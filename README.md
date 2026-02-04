@@ -39,7 +39,51 @@ In modern CSS, we don't usually hard-code 8px. Instead, we use rem units based o
 **Pro Tip:** If 8px feels too restrictive for tight spaces (like inside a small button), many systems allow for a 4px "half-step" to give you a bit more flexibility while staying within the family.
 
 ### 3. Component Structure and Styling
+Refer to [Figma for visualisation](https://www.figma.com/design/2a5BQYrW8WsMy4aMdb0SxJ/Go-Fish-Designs?node-id=0-1&t=RxczT0mIEsevZFhv-1) 
 
+#### Color Theme:
+```css
+/* Note these names can be changed */
+lightBlue: #93C8E9
+fishOrange: #EB6F3A
+darkBlue: #0C0878
+whiteText: #F4F4F4
+```
+
+#### UI/Themed Component standardisaton
+Compoents like buttons, popups(modals) can be standardise in a UI/Themed component. These should exist in a folder under client/component/themedUI.
+Components can be created like below:
+
+``` typescript
+
+interface Props{
+  children: ReactNode
+  classname?: string
+  otherProps: Type
+}
+
+export default function MyComponent({children, classname=""}:Props){
+  // Some code and logic if needed
+  return(
+    //  using Tailwind the themed styling is consistent and then more custom styling can be enetered via the classname Prop//
+    <div classname={`Themed UI styling like background color, hover color, text etc ${classname}`}>
+
+    
+    {children} // -> whatever is in the component
+
+    </div>
+  )
+}
+```
+
+This is how it would be called:
+```typescript
+<MyComponent classname="extra custom styling" otherProps={myprops}>
+
+//children
+<p>Hello I am your son</p>
+</MyComponent>
+```
 
 ## Setup
 
