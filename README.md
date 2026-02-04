@@ -64,8 +64,8 @@ Angu testing his commit and pushes
 
 ### Installation
 
-git clone [your-project-ssh-address]
-cd [your-project-name]
+git clone git@github.com:jennifer-legg/go-fish.git
+cd go-fish
 npm install # to install dependencies
 npm run dev # to start the dev server
 
