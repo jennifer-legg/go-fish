@@ -64,9 +64,9 @@ Angu testing his commit and pushes
 
 ### Installation
 
-git clone git@github.com:jennifer-legg/go-fish.git
-cd go-fish
-npm install # to install dependencies
+git clone git@github.com:jennifer-legg/go-fish.git  
+cd go-fish  
+npm install # to install dependencies  
 npm run dev # to start the dev server
 
 You can find the server running on [http://localhost:3000](http://localhost:3000) and the client running on [http://localhost:5173](http://localhost:5173).
