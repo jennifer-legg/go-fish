@@ -14,7 +14,9 @@ export default function dealCards(
   numPlayers: number,
   cardArr: number[],
 ): Result {
+  //maxCards is the number of cards each player should have in their hand at start of game. Dependant on num of players.
   const maxCards = numPlayers === 2 ? 7 : numPlayers === 3 ? 6 : 5
+
   //Create an array of player objects, arr same length of number of players
   const players: Player[] = Array.from(
     Array(numPlayers).fill({}),
@@ -22,6 +24,7 @@ export default function dealCards(
       return { id: index + 1, hand: [], sets: 0 }
     },
   )
+
   //Add cards to the hands of the players, up to max card number
   players.forEach(
     (player, index) =>
