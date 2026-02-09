@@ -1,15 +1,18 @@
-import { useFruits } from '../hooks/useFruits.ts'
+import { useGetShuffledDeck } from '../hooks/useDeck.ts'
 
 function App() {
-  const { data } = useFruits()
+  const { data: deck } = useGetShuffledDeck()
 
   return (
     <>
       <div className="app">
-        <h1 className="text-3xl font-bold underline">
-          Fullstack Boilerplate - with Fruits!
-        </h1>
-        <ul>{data && data.map((fruit) => <li key={fruit}>{fruit}</li>)}</ul>
+        <h1 className="text-3xl font-bold underline">Go Fish</h1>
+        {deck && (
+          <p>
+            {deck.cards.length} cards:{' '}
+            {deck.cards.map((card) => `${card.value} ${card.suit}, `)}
+          </p>
+        )}
       </div>
     </>
   )
