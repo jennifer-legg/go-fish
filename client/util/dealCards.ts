@@ -1,4 +1,4 @@
-// Takes a deck of cards and the number of players and returns an array of player objects
+// Takes an array of cards and the number of players and returns an array of player objects
 // and the remaining deck.
 // Each player object will have a hand of cards, with the amount of maxCards.
 // The remaining deck becomes the pond of cards.

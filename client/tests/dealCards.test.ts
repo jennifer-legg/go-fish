@@ -49,6 +49,7 @@ describe('dealCards for 2 players', () => {
     const { pond } = dealCards(2, arr52)
     // Assert
     expect(pond).toEqual(expected)
+    expect(pond.length).toEqual(52 - 2 * 7)
   })
 })
 
@@ -96,6 +97,7 @@ describe('dealCards for 3 players', () => {
     const { pond } = dealCards(3, arr52)
     // Assert
     expect(pond).toEqual(expected)
+    expect(pond.length).toEqual(52 - 3 * 6)
   })
 })
 
@@ -146,5 +148,6 @@ describe('dealCards for 4 players', () => {
     const { pond } = dealCards(4, arr52)
     // Assert
     expect(pond).toEqual(expected)
+    expect(pond.length).toEqual(52 - 4 * 5)
   })
 })
