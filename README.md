@@ -8,7 +8,7 @@ Angu testing his commit and pushes
 
 ### Game mechanics (2 player game)
 
-![Flow chart](public/images/game-mechanic.png)
+![Flow chart](public/images/game-mechanics.png)
 
 #### Functions / variables
 
