@@ -34,6 +34,7 @@
     "jsonwebtoken": "^9.0.2",
     "jwks-rsa": "^2.1.5",
     "knex": "^2.5.1",
+    "motion": "^12.34.0",
     "sqlite3": "^5.1.6",
     "superagent": "^10.2.2"
   },
