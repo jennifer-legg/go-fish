@@ -1,6 +1,8 @@
+//TODO -- player id to be more customised?
 // Takes a deck of cards and the number of players (2, 3 or 4) and returns an array of player objects
 // with a hand of cards from the cards in the deck, and an array of cards (the 'pond') which
 // is the remaining cards not distributed to the player's hands.
+// Currently assigns an random id to the players
 
 import { Card, Deck } from '../../models/deck'
 import Player from '../../models/player'
