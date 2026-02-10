@@ -1,5 +1,7 @@
+import { Card } from './deck'
+
 export default interface Player {
   id: number
-  hand: number[]
+  hand: Card[]
   sets: number
 }

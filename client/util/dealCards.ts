@@ -1,20 +1,18 @@
-// Takes an array of cards and the number of players and returns an array of player objects
-// and the remaining deck.
-// Each player object will have a hand of cards, with the amount of maxCards.
-// The remaining deck becomes the pond of cards.
+// Takes a deck of cards and the number of players (2, 3 or 4) and returns an array of player objects
+// with a hand of cards from the cards in the deck, and an array of cards (the 'pond') which
+// is the remaining cards not distributed to the player's hands.
 
+import { Card, Deck } from '../../models/deck'
 import Player from '../../models/player'
 
 interface Result {
   players: Player[]
-  pond: number[]
+  pond: Card[]
 }
 
-export default function dealCards(
-  numPlayers: number,
-  cardArr: number[],
-): Result {
-  //maxCards is the number of cards each player should have in their hand at start of game. Dependant on num of players.
+export default function dealCards(numPlayers: number, deck: Deck): Result {
+  //maxCards is the number of cards each player should have in their hand at start of game.
+  //Dependant on num of players.
   const maxCards = numPlayers === 2 ? 7 : numPlayers === 3 ? 6 : 5
 
   //Create an array of player objects, arr same length of number of players
@@ -28,12 +26,12 @@ export default function dealCards(
   //Add cards to the hands of the players, up to max card number
   players.forEach(
     (player, index) =>
-      (player.hand = cardArr.filter(
+      (player.hand = deck.cards.filter(
         (_, i) => (i + index) % numPlayers === 0 && i < numPlayers * maxCards,
       )),
   )
 
   //The last cards in the cardArray (not dealt to players) become the pond
-  const pond = cardArr.slice(-(cardArr.length - numPlayers * maxCards))
+  const pond = deck.cards.slice(-(deck.cards.length - numPlayers * maxCards))
   return { players, pond }
 }
