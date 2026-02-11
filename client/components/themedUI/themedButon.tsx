@@ -17,7 +17,7 @@ export default function Themedbutton({
 }: Props) {
   const transition = {
     type: 'spring',
-    stiffness: 110,
+    stiffness: 210,
     damping: 20,
     delay: 0.1,
   } as const
@@ -27,8 +27,9 @@ export default function Themedbutton({
       animate={{ scale: 1, opacity: 1 }}
       transition={transition}
       whileTap={{ scale: 0.8 }}
+      whileHover={{ opacity: 0.8 }}
       onClick={onClick}
-      className={`text-whiteText font-slackey w-44 rounded-full py-2 text-[24px] shadow-md shadow-gray-600 md:w-[368px] md:text-[48px] lg:w-[368px] lg:text-[48px] ${classname} cursor-pointer hover:opacity-80 ${color === 'orange' ? 'bg-fishOrange ' : 'bg-darkBlue'}`}
+      className={`w-44 rounded-full py-2 font-slackey text-[24px] text-whiteText shadow-md shadow-gray-600 md:w-[368px] md:text-[48px] lg:w-[368px] lg:text-[48px] ${classname} cursor-pointer  ${color === 'orange' ? 'bg-fishOrange ' : 'bg-darkBlue'}`}
     >
       {children}
     </motion.button>
