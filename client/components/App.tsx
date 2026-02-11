@@ -1,5 +1,6 @@
 import { useGetShuffledDeck } from '../hooks/useDeck.ts'
 import Themedbutton from './themedUI/themedButon.tsx'
+import TitleWrapper from './TitleWrapper.tsx'
 
 function App() {
   const { data: deck } = useGetShuffledDeck()
@@ -11,6 +12,7 @@ function App() {
         <Themedbutton onClick={() => console.log('button clicked')}>
           Hello
         </Themedbutton>
+        <TitleWrapper />
         {deck && (
           <p>
             {deck.cards.length} cards:{' '}
