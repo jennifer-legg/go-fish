@@ -141,6 +141,42 @@ This is how it would be called:
 1. gameManager() => void  
    Runs the game (prompts etc) and controls turns
 
+# Themed UI Components
+## ThemedButton Component
+The ThemedButton is a highly interactive, animated button built with **React, Tailwind CSS**, and **Framer Motion**. It features a spring-based entry animation and tactile feedback on hover and tap.
+### 🛠 Anatomy of the Component
+The component is composed of three main layers:
+
+1. **Motion Engine**: Uses motion.button to handle the entrance (scaling up) and interactive states (tapping/hovering).
+
+2. **Spring Physics**: A custom transition object defines the "bounciness" of the button.
+
+3.  **Dynamic Styling**: Uses template literals to toggle between **orange** and **darkBlue** themes based on props.
+
+#### Transition Config
+```Javascript
+const transition = {
+  type: 'spring',
+  stiffness: 210,
+  damping: 20,
+  delay: 0.1,
+}
+```
+### Props References
+| Prop | Type | Default | Description
+| :--- | :--- | :--- | :---|
+| Children | ReactNode |required| The text or elements to display inside the button.
+| color | 'orange' or 'darkBlue' | 'orange' | Switches the background color theme.
+| onClick| MouseEventHandler | undefined | function to trigger on click
+| classname| string| ''| Additional Tailwind classes for custom positioning or overrides.
+
+![themedBut](public/images/themedBut.png)
+<!-- | Screen Type | Breakpoint | Columns | Gutter | Margin | Tailwind
+| :--- | :--- | :--- | :--- | :--- | :---
+| **Mobile** | < 768px | 4 | 16px | 16px | sm
+| **Tablet** | 768px - 1023px | 8 | 20px | 32px | md
+| **Desktop** | 1024px+ | 12 | 24px | 40px (at 1440px) | lg -->
+
 ## Setup
 
 ### Installation
