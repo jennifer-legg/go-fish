@@ -1,10 +1,8 @@
 //Developed with help from https://medium.com/@dlrnjstjs/building-a-real-time-chat-application-with-react-and-socket-io-078d69d4dd6e
 import { socket, connectSocket, disconnectSocket } from '../../socket.js'
 import { useEffect, useState } from 'react'
-import Themedbutton from './themedUI/themedButon.tsx'
 import Player from '../../models/player.ts'
 import StartGameOptions from './StartGameOptions.tsx'
-import { connect } from 'superagent'
 
 interface Props {
   username: string
