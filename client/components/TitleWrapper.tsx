@@ -42,14 +42,16 @@ export default function TitleWrapper({ children }: Props) {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-8"
-        >
-          <p>Game area</p>
-          {children}
-        </motion.div>
+        {started && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8"
+          >
+            <p>Game area goes here!</p>
+            {children}
+          </motion.div>
+        )}
       </div>
 
       {/* Hide the button or move it once started */}
