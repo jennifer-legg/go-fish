@@ -171,12 +171,23 @@ const transition = {
 | classname| string| ''| Additional Tailwind classes for custom positioning or overrides.
 
 ![themedBut](public/images/themedBut.png)
-<!-- | Screen Type | Breakpoint | Columns | Gutter | Margin | Tailwind
-| :--- | :--- | :--- | :--- | :--- | :---
-| **Mobile** | < 768px | 4 | 16px | 16px | sm
-| **Tablet** | 768px - 1023px | 8 | 20px | 32px | md
-| **Desktop** | 1024px+ | 12 | 24px | 40px (at 1440px) | lg -->
 
+## TitleWrapper
+The TitleWrapper component is a high-order layout component designed to manage the visual state transition between the Intro/Title Screen and the Active Game State.
+
+### 1. State Management
+The component uses a single boolean state, started, to toggle the layout:
+* ```started: false```: Displays a large, centered hero section with the "Go Fish" logo and a "Play Now" button.
+* ```started: true```: Shrinks and relocates the logo to the top-left corner (navigation style) and mounts the game content.
+
+### 2. Animation Strategy
+We leverage Framer Motion for a seamless transition without needing complex CSS keyframes:
+
+* Shared Layout (layout prop): Framer Motion detects the change in the logo's position (from center-stack to top-left row) and automatically interpolates the movement.
+
+* Conditional Mounting: The children (game area) are only rendered once started is true, using an initial fade-in and slide-up animation to avoid a jarring appearance.
+
+* Responsive Scaling: The logo text and image sizes are controlled via Tailwind CSS utility classes, which transition smoothly over 500ms using transition-all.
 ## Setup
 
 ### Installation
