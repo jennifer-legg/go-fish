@@ -64,9 +64,7 @@ export default function SocketIo({ username }: Props) {
 
   const handleCreateNewGame = () => {
     const player = connectPlayer()
-    //Todo: Create random string function
-    const gameId = randomString
-    socket.emit('newGameId')
+    //Todo: Create random string function and connect using websocket
   }
 
   const handleJoinExistingGame = () => {
@@ -89,7 +87,6 @@ export default function SocketIo({ username }: Props) {
           joinExisting={handleJoinExistingGame}
         />
       )}
-
       <p>User is {isConnected ? 'connected' : 'disconnected'}</p>
     </>
   )
