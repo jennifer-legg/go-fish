@@ -1,7 +1,7 @@
 import { Server } from 'socket.io'
 
+//Socket.io server functions
 export default function setupSocketIO(io: Server): void {
-  //Client connections
   io.on('connection', (socket) => {
     console.log(`a user connected ${socket.id}`)
     socket.on('disconnect', () => {
