@@ -2,7 +2,7 @@
 import { socket, connectSocket, disconnectSocket } from '../../socket.js'
 import { useEffect, useState } from 'react'
 import Player from '../../models/player.ts'
-import StartGameOptions from './StartGameOptions.tsx'
+import Themedbutton from './themedUI/themedButon.tsx'
 
 interface Props {
   username: string
@@ -11,8 +11,15 @@ interface Props {
 export default function SocketIo({ username }: Props) {
   const [isConnected, setIsConnected] = useState<boolean>(false)
   const [players, setPlayers] = useState<Player[]>([])
-  const [currentPlayer, setCurrentPlayer] = useState<null | Player>(null)
-  const [gameId, setGameId] = useState<string>('')
+  const [currentPlayer, setCurrentPlayer] = useState<Player>({
+    username,
+    sets: 0,
+    hand: [],
+    gameId: '',
+    id: '',
+  })
+  //'Testing' to see if join a room works ok - these will be unique codes for each game
+  const [gameId, setGameId] = useState<string>('testing')
   const [isJoined, setIsJoined] = useState<boolean>(false)
 
   useEffect(() => {
@@ -26,66 +33,71 @@ export default function SocketIo({ username }: Props) {
       setIsConnected(false)
     })
 
-    // Player join notification
-    socket.on('playerJoined', (data) => {
-      console.log('joined a room', data)
-      //Todo: what happens on player joining?
+    // Player join notification. If player joining is current player, update currentPlayer as id has been added
+    socket.on('playerJoinedGame', (player) => {
+      console.log(`${player.id} joined room`)
+      setIsJoined(true)
+      if (currentPlayer.username === player?.username) {
+        setCurrentPlayer(player)
+      }
     })
 
     // Player leave notification
-    socket.on('playerLeft', (data) => {
-      console.log('left a room', data)
-      //Todo: what happens on player leaving?
+    socket.on('playerLeftGame', (player) => {
+      console.log(`${player.id} left room`)
+      setIsJoined(false)
+      setGameId('')
     })
 
     // Player list updates
     socket.on('players', (players) => {
+      console.log('set players', players)
       setPlayers(players)
     })
 
     return () => {
       socket.off('connect')
       socket.off('disconnect')
-      socket.off('userJoined')
-      socket.off('userLeft')
-      socket.off('roomUsers')
+      socket.off('playerJoined')
+      socket.off('playerLeft')
+      socket.off('players')
       disconnectSocket()
     }
-  }, [])
+  }, [currentPlayer.username])
 
   const handleLeaveGame = () => {
     disconnectSocket()
     setIsJoined(false)
-    setCurrentPlayer(null)
     setPlayers([])
   }
 
-  const handleCreateNewGame = () => {
-    const player = connectPlayer()
-    //Todo: Create random string function and connect using websocket
-  }
-
-  const handleJoinExistingGame = () => {
-    const player = connectPlayer()
-    socket.emit('joinGame', { gameId, player })
-  }
-
-  const connectPlayer = () => {
+  const handleJoinGame = () => {
     connectSocket()
-    const player: Player = { gameId, username, hand: [], sets: 0 }
-    setCurrentPlayer(player)
-    return player
+    socket.emit('joinGame', { gameId, currentPlayer })
   }
 
   return (
     <>
-      {!isConnected && !gameId && (
-        <StartGameOptions
-          createNew={handleCreateNewGame}
-          joinExisting={handleJoinExistingGame}
-        />
+      {!isConnected && (
+        <>
+          <Themedbutton onClick={handleJoinGame}>Join a game</Themedbutton>
+          <p>User is disconnected</p>
+        </>
       )}
-      <p>User is {isConnected ? 'connected' : 'disconnected'}</p>
+      {isConnected && isJoined && (
+        <>
+          <p>Game: {gameId}</p>
+          <p>
+            Players in game (room):{' '}
+            {players.map((player) =>
+              player.username === currentPlayer.username
+                ? `${player.username}(you)`
+                : player.username,
+            )}
+          </p>
+          <Themedbutton onClick={handleLeaveGame}>Leave game</Themedbutton>
+        </>
+      )}
     </>
   )
 }
