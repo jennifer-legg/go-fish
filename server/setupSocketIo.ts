@@ -1,5 +1,6 @@
 import { Server } from 'socket.io'
 import Player, { PlayerCollection } from '../models/player'
+import Response from '../models/response'
 
 //Initialise storage for connected players
 const players: PlayerCollection = {}
@@ -10,18 +11,18 @@ export default function setupSocketIO(io: Server): void {
     console.log(`a user connected ${socket.id}`)
 
     //When a player joins a game (a socket io room)
-    socket.on('joinGame', ({ gameId, currentPlayer }) =>
-      //Add player to storage
-      {
+    socket.on('joinGame', ({ gameId, currentPlayer, maxPlayers }, callBack) => {
+      //Check if the game has less than the specified number of players
+      const roomSize = io.of('/').adapter.rooms.get(gameId)?.size || 0
+      if (roomSize < maxPlayers) {
+        //Add player to storage
         const updatedPlayer: Player = {
           ...currentPlayer,
           gameId,
           id: socket.id,
         }
         players[socket.id] = updatedPlayer
-        console.log(players)
-
-        //Join the specified game
+        //Join the specified game if game has less than specified number of players
         socket.join(gameId)
 
         //Notify other players in the game about the new player
@@ -32,8 +33,16 @@ export default function setupSocketIO(io: Server): void {
           (player) => player.gameId === gameId,
         )
         io.to(gameId).emit('players', playersInGame)
-      },
-    )
+        //Notify the user that the game has been joined
+        const response: Response = { status: 'ok' }
+        callBack(response)
+      } else {
+        //Notify the user that the game could not be joined and disconnect
+        const response: Response = { status: 'failed' }
+        callBack(response)
+        socket.disconnect()
+      }
+    })
 
     //When a player disconnects
     socket.on('disconnect', () => {

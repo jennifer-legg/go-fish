@@ -8,7 +8,6 @@ function App() {
   return (
     <>
       <div className="app">
-        <h1 className="text-3xl font-bold underline">Go Fish</h1>
         {/* Todo: make username unique */}
         <TitleWrapper>
           <SocketIo username="Jen" />

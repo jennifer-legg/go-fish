@@ -3,6 +3,7 @@ import { socket, connectSocket, disconnectSocket } from '../../socket.js'
 import { useEffect, useState } from 'react'
 import Player from '../../models/player.ts'
 import Themedbutton from './themedUI/themedButon.tsx'
+import Response from '../../models/response.ts'
 
 interface Props {
   username: string
@@ -11,6 +12,7 @@ interface Props {
 export default function SocketIo({ username }: Props) {
   const [isConnected, setIsConnected] = useState<boolean>(false)
   const [players, setPlayers] = useState<Player[]>([])
+  const numPlayers = 2
   const [currentPlayer, setCurrentPlayer] = useState<Player>({
     username,
     sets: 0,
@@ -18,6 +20,7 @@ export default function SocketIo({ username }: Props) {
     gameId: '',
     id: '',
   })
+  const [errorMsg, setErrorMsg] = useState<string>('')
   //'Testing' to see if join a room works ok - these will be unique codes for each game
   const [gameId, setGameId] = useState<string>('testing')
   const [isJoined, setIsJoined] = useState<boolean>(false)
@@ -46,7 +49,7 @@ export default function SocketIo({ username }: Props) {
     socket.on('playerLeftGame', (player) => {
       console.log(`${player.id} left room`)
       setIsJoined(false)
-      setGameId('')
+      setGameId('testing')
     })
 
     // Player list updates
@@ -68,12 +71,24 @@ export default function SocketIo({ username }: Props) {
   const handleLeaveGame = () => {
     disconnectSocket()
     setIsJoined(false)
+    setIsConnected(false)
     setPlayers([])
+    setCurrentPlayer({ username, sets: 0, hand: [], gameId: '', id: '' })
   }
 
   const handleJoinGame = () => {
     connectSocket()
-    socket.emit('joinGame', { gameId, currentPlayer })
+    socket.emit(
+      'joinGame',
+      { gameId, currentPlayer, maxPlayers: numPlayers },
+      (response: Response) => {
+        response.status === 'failed'
+          ? setErrorMsg(
+              'Failed to join game. Game may already have maximum players',
+            )
+          : setErrorMsg('')
+      },
+    )
   }
 
   return (
@@ -84,8 +99,10 @@ export default function SocketIo({ username }: Props) {
           <p>User is disconnected</p>
         </>
       )}
+      {errorMsg && <p>{errorMsg}</p>}
       {isConnected && isJoined && (
         <>
+          <Themedbutton onClick={handleLeaveGame}>Leave game</Themedbutton>
           <p>Game: {gameId}</p>
           <p>
             Players in game (room):{' '}
@@ -95,7 +112,6 @@ export default function SocketIo({ username }: Props) {
                 : player.username,
             )}
           </p>
-          <Themedbutton onClick={handleLeaveGame}>Leave game</Themedbutton>
         </>
       )}
     </>
