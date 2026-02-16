@@ -13,6 +13,7 @@
 # Jest coverage report
 /coverage/*
 
+/promptkit
 #script local
 killPort.sh
 # Dotenv env settings
