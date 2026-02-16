@@ -1,7 +1,7 @@
 //Developed with help from https://medium.com/@dlrnjstjs/building-a-real-time-chat-application-with-react-and-socket-io-078d69d4dd6e
 import { socket, connectSocket, disconnectSocket } from '../../socket.js'
 import { useEffect, useState } from 'react'
-import Player from '../../models/player.ts'
+import Player, { RivalPlayer } from '../../models/player.ts'
 import Themedbutton from './themedUI/themedButon.tsx'
 import Response from '../../models/response.ts'
 
@@ -11,7 +11,7 @@ interface Props {
 
 export default function SocketIo({ username }: Props) {
   const [isConnected, setIsConnected] = useState<boolean>(false)
-  const [players, setPlayers] = useState<Player[]>([])
+  const [rivalPlayers, setRivalPlayers] = useState<RivalPlayer[]>([])
   const numPlayers = 2
   const [currentPlayer, setCurrentPlayer] = useState<Player>({
     username,
@@ -53,9 +53,9 @@ export default function SocketIo({ username }: Props) {
     })
 
     // Player list updates
-    socket.on('players', (players) => {
-      console.log('set players', players)
-      setPlayers(players)
+    socket.on('players', (rivalPlayers: RivalPlayer[]) => {
+      console.log('set players', rivalPlayers)
+      setRivalPlayers(rivalPlayers)
     })
 
     return () => {
@@ -69,10 +69,10 @@ export default function SocketIo({ username }: Props) {
   }, [currentPlayer.username])
 
   const handleLeaveGame = () => {
-    disconnectSocket()
+    disconnectSocket(gameId)
     setIsJoined(false)
     setIsConnected(false)
-    setPlayers([])
+    setRivalPlayers([])
     setCurrentPlayer({ username, sets: 0, hand: [], gameId: '', id: '' })
   }
 
@@ -106,11 +106,12 @@ export default function SocketIo({ username }: Props) {
           <p>Game: {gameId}</p>
           <p>
             Players in game (room):{' '}
-            {players.map((player) =>
-              player.username === currentPlayer.username
-                ? `${player.username}(you)`
-                : player.username,
-            )}
+            <ul>
+              {rivalPlayers.map((player) => (
+                <li key={player.username}>player.username</li>
+              ))}
+              <li>{currentPlayer.username} (you)</li>
+            </ul>
           </p>
         </>
       )}

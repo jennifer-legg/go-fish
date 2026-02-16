@@ -11,3 +11,9 @@ export default interface Player {
 export interface PlayerCollection {
   [key: string]: Player
 }
+
+export interface RivalPlayer {
+  username: string
+  numCards: number
+  sets: number
+}
