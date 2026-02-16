@@ -17,3 +17,6 @@
 killPort.sh
 # Dotenv env settings
 .env
+
+#ai prompt kit
+promptkit
