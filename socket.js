@@ -22,8 +22,8 @@ export const connectSocket = () => {
   }
 }
 
-export const disconnectSocket = () => {
+export const disconnectSocket = (gameId) => {
   if (socket.connected) {
-    socket.disconnect()
+    socket.disconnect(gameId)
   }
 }

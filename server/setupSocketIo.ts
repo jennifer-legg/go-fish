@@ -1,9 +1,10 @@
 import { Server } from 'socket.io'
-import Player, { PlayerCollection } from '../models/player'
+import Player from '../models/player'
 import Response from '../models/response'
+import { Game, GameCollection } from '../models/game'
 
 //Initialise storage for connected players
-const players: PlayerCollection = {}
+const activeGames: GameCollection = {}
 
 //Socket.io server commands
 export default function setupSocketIO(io: Server): void {
@@ -12,54 +13,74 @@ export default function setupSocketIO(io: Server): void {
 
     //When a player joins a game (a socket io room)
     socket.on('joinGame', ({ gameId, currentPlayer, maxPlayers }, callBack) => {
-      //Check if the game has less than the specified number of players, adds player if not at max
-      const roomSize: number = Object.values(players).filter(
-        (player) => player.gameId === gameId,
-      ).length
-      if (roomSize < maxPlayers) {
-        //Add player to storage
-        const updatedPlayer: Player = {
-          ...currentPlayer,
-          gameId,
-          id: socket.id,
+      //Add socket id to the player object
+      const updatedPlayer: Player = {
+        ...currentPlayer,
+        id: socket.id,
+      }
+      //Check if the game exists already
+      if (gameId in activeGames) {
+        const currentGame = activeGames[gameId]
+        //If it exists, check if the game has less than the specified number of players.
+        //If it has less than max, add player to game. If not, fail connection.
+        if (currentGame.players.length < maxPlayers) {
+          //Add player to game storage
+          currentGame.players = [...currentGame.players, currentPlayer]
+          //Add player to room
+          socket.join(gameId)
+          //Notify other players in the game about the new player
+          io.to(gameId).emit('playerJoinedGame', updatedPlayer)
+          //Send updated player list to all users in the room
+          // const playersInGame: Player[] = Object.values(players).filter(
+          //   (player) => player.gameId === gameId,
+          // )
+          // io.to(gameId).emit('players', playersInGame)
+          //Notify the user that the game has been joined
+          const response: Response = { status: 'ok' }
+          callBack(response)
+        } else {
+          //Notify the user that the game could not be joined and disconnect
+          const response: Response = { status: 'failed' }
+          callBack(response)
+          socket.disconnect()
         }
-        players[socket.id] = updatedPlayer
-        //Join the specified game if game has less than specified number of players
+      } else {
+        //If it doesn't exist, create game object with no cards/deck and add to storage
+        const newGame: Game = {
+          players: [{ ...updatedPlayer, id: socket.id }],
+          pond: [],
+        }
+        activeGames[gameId] = newGame
+        //Add player to room
         socket.join(gameId)
-
-        //Notify other players in the game about the new player
-        io.to(gameId).emit('playerJoinedGame', updatedPlayer)
-
-        //Send updated player list to all users in the room
-        const playersInGame: Player[] = Object.values(players).filter(
-          (player) => player.gameId === gameId,
-        )
-        io.to(gameId).emit('players', playersInGame)
-        //Notify the user that the game has been joined
+        //Notify player that new game has been created
         const response: Response = { status: 'ok' }
         callBack(response)
-      } else {
-        //Notify the user that the game could not be joined and disconnect
-        const response: Response = { status: 'failed' }
-        callBack(response)
-        socket.disconnect()
       }
     })
 
     //When a player disconnects
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (gameId: string) => {
       console.log(`user ${socket.id} disconnected`)
-      const player = players[socket.id]
-      if (player) {
-        //Send update about player having left to remaining players in game (socket room)
-        socket.to(player.gameId).emit('playerLeftGame', player)
-        //Remove player from storage
-        delete players[socket.id]
-        //Update players list for front-end
-        const remainingPlayersInGame: Player[] = Object.values(players).filter(
-          (p) => p.gameId === player.gameId,
-        )
-        io.to(player.gameId).emit('playerLeftGame', remainingPlayersInGame)
+      if (gameId in activeGames) {
+        const player = activeGames[gameId].players.filter((player) => player.id)
+        if (player) {
+          //Check if there are any other players in the game
+          if (activeGames[gameId].players.length > 1) {
+            //Keep game active
+            //Send update about player having left to remaining players in game (socket room)
+            socket.to(gameId).emit('playerLeftGame', player)
+            //TODO: Update storage
+            //Advise remaining player that player has left, and send list of remaining players
+            const remainingPlayersInGame: string[] = activeGames[
+              gameId
+            ].players.map((player) => player.username)
+            io.to(gameId).emit('playerLeftGame', remainingPlayersInGame)
+          } else {
+            //Delete game
+            delete activeGames[gameId]
+          }
+        }
       }
     })
   })
