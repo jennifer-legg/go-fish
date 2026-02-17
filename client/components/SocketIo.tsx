@@ -36,26 +36,29 @@ export default function SocketIo({ username }: Props) {
       setIsConnected(false)
     })
 
-    // Player join notification. If player joining is current player, update currentPlayer as id has been added
-    socket.on('playerJoinedGame', (player) => {
-      console.log(`${player.id} joined room`)
-      setIsJoined(true)
-      if (currentPlayer.username === player?.username) {
-        setCurrentPlayer(player)
-      }
+    // Player join notification.
+    socket.on('playerJoinedGame', (username) => {
+      console.log(`${username} joined game`)
+      username === currentPlayer.username ? setIsJoined(true) : null
     })
 
     // Player leave notification
-    socket.on('playerLeftGame', (player) => {
-      console.log(`${player.id} left room`)
-      setIsJoined(false)
+    socket.on('playerLeftGame', (username) => {
+      console.log(`${username} left room`)
+      username === currentPlayer.username ? setIsJoined(false) : null
       setGameId('testing')
     })
 
-    // Player list updates
-    socket.on('players', (rivalPlayers: RivalPlayer[]) => {
+    // Rival player list updates
+    socket.on('rivalPlayers', (rivalPlayers: RivalPlayer[]) => {
       console.log('set players', rivalPlayers)
       setRivalPlayers(rivalPlayers)
+    })
+
+    // Current player updates
+    socket.on('currentPlayer', (player) => {
+      console.log('update current player')
+      setCurrentPlayer(player)
     })
 
     return () => {
@@ -108,7 +111,7 @@ export default function SocketIo({ username }: Props) {
             Players in game (room):{' '}
             <ul>
               {rivalPlayers.map((player) => (
-                <li key={player.username}>player.username</li>
+                <li key={player.username}>{player.username}</li>
               ))}
               <li>{currentPlayer.username} (you)</li>
             </ul>
