@@ -22,6 +22,10 @@ function App() {
     setStarted(false)
   }
 
+  const handleStartNewGame = () => {
+    setStartAGame(true)
+  }
+
   return (
     <>
       <div className="app bg-lightBlue">
@@ -38,10 +42,7 @@ function App() {
               </Themedbutton>
             )}
             {!startAGame && !joinGame && (
-              <Themedbutton
-                onClick={() => setStartAGame(true)}
-                color="darkBlue"
-              >
+              <Themedbutton onClick={() => handleStartNewGame} color="darkBlue">
                 <ThemedText>Start a Game</ThemedText>
               </Themedbutton>
             )}
