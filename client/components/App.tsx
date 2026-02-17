@@ -1,5 +1,5 @@
 // import { useGetShuffledDeck } from '../hooks/useDeck.ts'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import SocketIo from './SocketIo'
 import Themedbutton from './themedUI/ThemedButton.tsx'
 import ThemedContainer from './themedUI/ThemedContainer.tsx'
@@ -13,13 +13,25 @@ function App() {
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
   const [accessCode, setAccessCode] = useState('')
+  const [started, setStarted] = useState<boolean>(false)
+
+  const resetGame = () => {
+    setAccessCode('')
+    setJoinGame(false)
+    setStartAGame(false)
+    setStarted(false)
+  }
 
   return (
     <>
       <div className="app bg-lightBlue">
         {/* Todo: make username unique */}
-        <TitleWrapper>
-          <ThemedContainer classname="w-3/5 min-w-[320px] md:min-w-[600px] md:w-4/5 h-52 md:h-80 lg:h-90 ">
+        <TitleWrapper
+          started={started}
+          setStarted={setStarted}
+          resetGame={resetGame}
+        >
+          <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 h-52 md:h-80 lg:h-90 ">
             {!startAGame && !joinGame && (
               <Themedbutton onClick={() => setJoinGame(true)} color="darkBlue">
                 <ThemedText>Join a Game</ThemedText>

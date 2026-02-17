@@ -1,12 +1,20 @@
-import { ReactNode, useState } from 'react'
+import React, { ReactNode, useState } from 'react'
 import Themedbutton from './themedUI/ThemedButton'
 import { motion } from 'motion/react'
 
 interface Props {
   children?: ReactNode
+  started: boolean
+  setStarted: React.Dispatch<React.SetStateAction<boolean>>
+  resetGame: () => void
 }
-export default function TitleWrapper({ children }: Props) {
-  const [started, setStarted] = useState<boolean>(false)
+export default function TitleWrapper({
+  children,
+  started,
+  setStarted,
+  resetGame,
+}: Props) {
+  // const [started, setStarted] = useState<boolean>(false)
 
   const columnStruct =
     'grid grid-cols-4 gap-[12px] md:grid-cols-8 md:gap-[12px] lg:grid-cols-12 lg:gap-[20px] min-h-screen'
@@ -28,7 +36,7 @@ export default function TitleWrapper({ children }: Props) {
             className={` flex w-full gap-2 ${started ? 'items-center justify-start pt-4  ' : 'flex-col items-center justify-center'}`} // Changed from fixed width for better logo-style scaling
             transition={{ type: 'spring', stiffness: 150, damping: 20 }}
           >
-            <button onClick={() => setStarted(false)}>
+            <button onClick={() => resetGame()}>
               <h1
                 className={`font-slackey text-darkBlue transition-all duration-500 ${
                   started
