@@ -1,4 +1,4 @@
-//https://www.geeksforgeeks.org/javascript/random-string-generator-using-javascript/
+//Base code from https://www.geeksforgeeks.org/javascript/random-string-generator-using-javascript/
 
 export default function generateRandomString(): string {
   const length = 7
