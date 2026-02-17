@@ -6,18 +6,20 @@ import ThemedContainer from './themedUI/ThemedContainer.tsx'
 import ThemedText from './themedUI/ThemedText.tsx'
 import TitleWrapper from './TitleWrapper.tsx'
 import ThemedTextInput from './themedUI/ThemedTextInput.tsx'
+import { preview } from 'vite'
 
 function App() {
   // const { data: deck } = useGetShuffledDeck()
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
+  const [accessCode, setAccessCode] = useState('')
 
   return (
     <>
       <div className="app bg-lightBlue">
         {/* Todo: make username unique */}
         <TitleWrapper>
-          <ThemedContainer classname="w-3/5 min-w-[248px] md:w-4/5 h-44 md:h-80 lg:h-90 ">
+          <ThemedContainer classname="w-3/5 min-w-[320px] md:min-w-[600px] md:w-4/5 h-52 md:h-80 lg:h-90 ">
             {!startAGame && !joinGame && (
               <Themedbutton onClick={() => setJoinGame(true)} color="darkBlue">
                 <ThemedText>Join a Game</ThemedText>
@@ -31,12 +33,31 @@ function App() {
                 <ThemedText>Start a Game</ThemedText>
               </Themedbutton>
             )}
-            {joinGame && (
+            {startAGame && (
               <div className="flex flex-col items-center">
                 <ThemedText header={true}> ACCESS CODE </ThemedText>
                 <ThemedTextInput>
-                  <ThemedText>asjhda89123 </ThemedText>
+                  <ThemedText>Access code here </ThemedText>
                 </ThemedTextInput>
+              </div>
+            )}
+            {joinGame && (
+              <div className="flex flex-col items-center justify-center gap-1">
+                <ThemedText header={true}> Enter Access Code</ThemedText>
+                <ThemedTextInput>
+                  <input
+                    value={accessCode}
+                    className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
+                    type="text"
+                    id="accessCode"
+                    placeholder="Enter Access Code..."
+                    onChange={(e) => setAccessCode(e.target.value)}
+                  />
+                </ThemedTextInput>
+                <Themedbutton color="darkBlue" classname="my-2">
+                  {' '}
+                  Submit{' '}
+                </Themedbutton>
               </div>
             )}
           </ThemedContainer>
