@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react'
-import Themedbutton from './themedUI/themedButon'
+import Themedbutton from './themedUI/ThemedButton'
 import { motion } from 'motion/react'
 
 interface Props {
@@ -9,7 +9,7 @@ export default function TitleWrapper({ children }: Props) {
   const [started, setStarted] = useState<boolean>(false)
 
   const columnStruct =
-    'grid grid-cols-4 gap-[12px] md:grid-cols-8 md:gap-[12px] lg:grid-cols-12 lg:gap-[20px] '
+    'grid grid-cols-4 gap-[12px] md:grid-cols-8 md:gap-[12px] lg:grid-cols-12 lg:gap-[20px] min-h-screen'
   return (
     // Added min-h-screen to ensure the "center" is actually the middle of the page
     <div
@@ -17,12 +17,12 @@ export default function TitleWrapper({ children }: Props) {
     >
       <div className={columnStruct}>
         <div
-          className={`relative col-span-4 flex min-h-[70vh] flex-col items-center justify-center md:col-span-8 lg:col-span-12 `}
+          className={`col-span-4 flex flex-col items-center justify-center md:col-span-8 lg:col-span-12 `}
         >
           {/* The layout prop tells Framer Motion to animate the position change */}
           <motion.div
             layout
-            className={`flex w-auto gap-2 ${started ? 'absolute left-1 top-1 flex-row items-center justify-center' : 'flex-col items-center'}`} // Changed from fixed width for better logo-style scaling
+            className={`flex w-full gap-2 ${started ? 'items-center justify-start pt-4 ' : 'flex-col items-center justify-center'}`} // Changed from fixed width for better logo-style scaling
             transition={{ type: 'spring', stiffness: 150, damping: 20 }}
           >
             <h1
@@ -49,14 +49,14 @@ export default function TitleWrapper({ children }: Props) {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-8"
+              className={`flex w-full flex-1 flex-col items-center justify-center self-center`}
             >
-              <p>Game area goes here!</p>
+              {/* GAME GOES IN HERE */}
               {children}
             </motion.div>
           )}
           {!started && (
-            <div className="col-span-2 mt-8 flex  md:col-span-4 lg:col-span-4">
+            <div className="mt-8 flex">
               <Themedbutton onClick={() => setStarted(true)}>
                 Play Now
               </Themedbutton>
