@@ -21,19 +21,24 @@ export default function TitleWrapper({ children }: Props) {
         >
           {/* The layout prop tells Framer Motion to animate the position change */}
           <motion.div
+            id="logo"
+            // NEED TO DO: RESETS, Might need to call a proper reset where all states are resetted //
+
             layout
-            className={`flex w-full gap-2 ${started ? 'items-center justify-start pt-4 ' : 'flex-col items-center justify-center'}`} // Changed from fixed width for better logo-style scaling
+            className={` flex w-full gap-2 ${started ? 'items-center justify-start pt-4  ' : 'flex-col items-center justify-center'}`} // Changed from fixed width for better logo-style scaling
             transition={{ type: 'spring', stiffness: 150, damping: 20 }}
           >
-            <h1
-              className={`font-slackey text-darkBlue transition-all duration-500 ${
-                started
-                  ? 'text-[32px] md:text-[48px] '
-                  : 'text-[64px] md:text-[128px] lg:text-[160px]'
-              }`}
-            >
-              Go Fish
-            </h1>
+            <button onClick={() => setStarted(false)}>
+              <h1
+                className={`font-slackey text-darkBlue transition-all duration-500 ${
+                  started
+                    ? 'cursor-pointer text-[32px] hover:opacity-80 md:text-[48px]'
+                    : 'cursor-default text-[64px] md:text-[128px] lg:text-[160px]'
+                }`}
+              >
+                Go Fish
+              </h1>
+            </button>
             <div
               className={`${started ? 'w-12 md:w-16' : 'w-[168px] md:w-[320px] lg:w-[360px]'}`}
             >
