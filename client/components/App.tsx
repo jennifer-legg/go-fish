@@ -1,12 +1,12 @@
 // import { useGetShuffledDeck } from '../hooks/useDeck.ts'
-import { useEffect, useState } from 'react'
-import SocketIo from './SocketIo'
+import { useState } from 'react'
+// import SocketIo from './SocketIo'
 import Themedbutton from './themedUI/ThemedButton.tsx'
 import ThemedContainer from './themedUI/ThemedContainer.tsx'
 import ThemedText from './themedUI/ThemedText.tsx'
 import TitleWrapper from './TitleWrapper.tsx'
 import ThemedTextInput from './themedUI/ThemedTextInput.tsx'
-import { preview } from 'vite'
+import generateRandomString from '../util/generateRandomString.ts'
 
 function App() {
   // const { data: deck } = useGetShuffledDeck()
@@ -24,6 +24,8 @@ function App() {
 
   const handleStartNewGame = () => {
     setStartAGame(true)
+    const newAccessCode = generateRandomString()
+    setAccessCode(newAccessCode)
   }
 
   return (
@@ -42,7 +44,7 @@ function App() {
               </Themedbutton>
             )}
             {!startAGame && !joinGame && (
-              <Themedbutton onClick={() => handleStartNewGame} color="darkBlue">
+              <Themedbutton onClick={handleStartNewGame} color="darkBlue">
                 <ThemedText>Start a Game</ThemedText>
               </Themedbutton>
             )}
@@ -50,7 +52,7 @@ function App() {
               <div className="flex flex-col items-center">
                 <ThemedText header={true}> ACCESS CODE </ThemedText>
                 <ThemedTextInput>
-                  <ThemedText>Access code here </ThemedText>
+                  <ThemedText>{accessCode}</ThemedText>
                 </ThemedTextInput>
               </div>
             )}
