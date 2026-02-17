@@ -2,7 +2,7 @@
 import { socket, connectSocket, disconnectSocket } from '../../socket.js'
 import { useEffect, useState } from 'react'
 import Player from '../../models/player.ts'
-import Themedbutton from './themedUI/themedButon.tsx'
+import Themedbutton from './themedUI/ThemedButton.tsx'
 import Response from '../../models/response.ts'
 
 interface Props {
