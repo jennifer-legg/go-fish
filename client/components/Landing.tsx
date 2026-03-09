@@ -7,16 +7,10 @@ import ThemedTextInput from './themedUI/ThemedTextInput.tsx'
 import generateRandomString from '../util/generateRandomString.ts'
 
 interface Props {
-  isConnected: boolean
-  isJoined: boolean
   connectToGame: (gameId: string) => void
 }
 
-export default function Landing({
-  isConnected,
-  isJoined,
-  connectToGame,
-}: Props) {
+export default function Landing({ connectToGame }: Props) {
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
   const [accessCode, setAccessCode] = useState('')

@@ -16,7 +16,7 @@ function App() {
     id: '',
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
-  const [isJoined, setIsJoined] = useState<boolean>(false)
+  const [gameId, setGameId] = useState('')
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -32,7 +32,6 @@ function App() {
     // Player join notification. If player joining is current player, update currentPlayer as id has been added
     socket.on('playerJoinedGame', (player) => {
       console.log(`${player.id} joined room`)
-      setIsJoined(true)
       if (currentPlayer.username === player?.username) {
         setCurrentPlayer(player)
       }
@@ -41,7 +40,6 @@ function App() {
     // Player leave notification
     socket.on('playerLeftGame', (player) => {
       console.log(`${player.id} left room`)
-      setIsJoined(false)
     })
 
     // Player list updates
@@ -60,21 +58,22 @@ function App() {
     }
   }, [currentPlayer.username])
 
-  const handleLeaveGame = () => {
-    disconnectSocket()
-    setIsJoined(false)
-    setIsConnected(false)
-    setPlayers([])
-    setCurrentPlayer({
-      username: 'testing',
-      sets: 0,
-      hand: [],
-      gameId: '',
-      id: '',
-    })
-  }
+  // const handleLeaveGame = () => {
+  //   disconnectSocket()
+  //   setIsConnected(false)
+  //   setPlayers([])
+  //   setCurrentPlayer({
+  //     username: 'testing',
+  //     sets: 0,
+  //     hand: [],
+  //     gameId: '',
+  //     id: '',
+  //   })
+  //   setGameId('')
+  // }
 
   const handleJoinGame = (gameId: string) => {
+    setGameId(gameId)
     connectSocket()
     socket.emit(
       'joinGame',
@@ -91,12 +90,10 @@ function App() {
   return (
     <>
       <div className="app bg-lightBlue">
-        <Landing
-          isConnected={isConnected}
-          isJoined={isJoined}
-          connectToGame={handleJoinGame}
-        />
-        {players[0] && players.map((player) => player.username)}
+        <p>{errorMsg}</p>
+        {!gameId && !isConnected && <Landing connectToGame={handleJoinGame} />}
+        {players[0] &&
+          players.map((player) => `${player.username} gameId: ${gameId}`)}
       </div>
     </>
   )
