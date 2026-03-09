@@ -91,8 +91,13 @@ function App() {
     <>
       <div className="app bg-lightBlue">
         <p>{errorMsg}</p>
-        {!gameId && !isConnected && <Landing connectToGame={handleJoinGame} />}
-        {gameId && isConnected && (
+        {players.length !== numPlayers && (
+          <Landing
+            connectToGame={handleJoinGame}
+            numPlayersNeeded={numPlayers - players.length}
+          />
+        )}
+        {gameId && isConnected && players.length === numPlayers && (
           <p>
             {players[0] &&
               players.map((player) => `${player.username} gameId: ${gameId}`)}

@@ -5,16 +5,19 @@ import ThemedText from './themedUI/ThemedText.tsx'
 import TitleWrapper from './TitleWrapper.tsx'
 import ThemedTextInput from './themedUI/ThemedTextInput.tsx'
 import generateRandomString from '../util/generateRandomString.ts'
+import Loading from './Loading.tsx'
 
 interface Props {
   connectToGame: (gameId: string) => void
+  numPlayersNeeded: number
 }
 
-export default function Landing({ connectToGame }: Props) {
+export default function Landing({ connectToGame, numPlayersNeeded }: Props) {
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
   const [accessCode, setAccessCode] = useState('')
   const [started, setStarted] = useState<boolean>(false)
+  const [waitingForPlayer, setWaitingForPlayer] = useState(false)
 
   const resetGame = () => {
     setAccessCode('')
@@ -28,6 +31,7 @@ export default function Landing({ connectToGame }: Props) {
     const newAccessCode = generateRandomString()
     setAccessCode(newAccessCode)
     connectToGame(newAccessCode)
+    setWaitingForPlayer(true)
   }
 
   const handleJoinEstablishedGame = () => {
@@ -58,6 +62,9 @@ export default function Landing({ connectToGame }: Props) {
               <ThemedTextInput>
                 <ThemedText>{accessCode}</ThemedText>
               </ThemedTextInput>
+              {waitingForPlayer && (
+                <Loading numPlayersNeeded={numPlayersNeeded} />
+              )}
             </div>
           )}
           {joinGame && (
