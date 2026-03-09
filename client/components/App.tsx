@@ -92,8 +92,12 @@ function App() {
       <div className="app bg-lightBlue">
         <p>{errorMsg}</p>
         {!gameId && !isConnected && <Landing connectToGame={handleJoinGame} />}
-        {players[0] &&
-          players.map((player) => `${player.username} gameId: ${gameId}`)}
+        {gameId && isConnected && (
+          <p>
+            {players[0] &&
+              players.map((player) => `${player.username} gameId: ${gameId}`)}
+          </p>
+        )}
       </div>
     </>
   )
