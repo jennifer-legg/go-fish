@@ -1,83 +1,108 @@
-// import { useGetShuffledDeck } from '../hooks/useDeck.ts'
-import { useState } from 'react'
-// import SocketIo from './SocketIo'
-import Themedbutton from './themedUI/ThemedButton.tsx'
-import ThemedContainer from './themedUI/ThemedContainer.tsx'
-import ThemedText from './themedUI/ThemedText.tsx'
-import TitleWrapper from './TitleWrapper.tsx'
-import ThemedTextInput from './themedUI/ThemedTextInput.tsx'
-import generateRandomString from '../util/generateRandomString.ts'
+import { socket, connectSocket, disconnectSocket } from '../../socket.js'
+import { useEffect, useState } from 'react'
+import Player from '../../models/player.ts'
+import Response from '../../models/response.ts'
+import Landing from './Landing.tsx'
 
 function App() {
-  // const { data: deck } = useGetShuffledDeck()
-  const [joinGame, setJoinGame] = useState(false)
-  const [startAGame, setStartAGame] = useState(false)
-  const [accessCode, setAccessCode] = useState('')
-  const [started, setStarted] = useState<boolean>(false)
+  const [isConnected, setIsConnected] = useState<boolean>(false)
+  const [players, setPlayers] = useState<Player[]>([])
+  const numPlayers = 2
+  const [currentPlayer, setCurrentPlayer] = useState<Player>({
+    username: 'testing',
+    sets: 0,
+    hand: [],
+    gameId: '',
+    id: '',
+  })
+  const [errorMsg, setErrorMsg] = useState<string>('')
+  const [gameId, setGameId] = useState('')
 
-  const resetGame = () => {
-    setAccessCode('')
-    setJoinGame(false)
-    setStartAGame(false)
-    setStarted(false)
+  useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to server')
+      setIsConnected(true)
+    })
+
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server')
+      setIsConnected(false)
+    })
+
+    // Player join notification. If player joining is current player, update currentPlayer as id has been added
+    socket.on('playerJoinedGame', (player) => {
+      console.log(`${player.id} joined room`)
+      if (currentPlayer.username === player?.username) {
+        setCurrentPlayer(player)
+      }
+    })
+
+    // Player leave notification
+    socket.on('playerLeftGame', (player) => {
+      console.log(`${player.id} left room`)
+    })
+
+    // Player list updates
+    socket.on('players', (players) => {
+      console.log('set players', players)
+      setPlayers(players)
+    })
+
+    return () => {
+      socket.off('connect')
+      socket.off('disconnect')
+      socket.off('playerJoined')
+      socket.off('playerLeft')
+      socket.off('players')
+      disconnectSocket()
+    }
+  }, [currentPlayer.username])
+
+  // const handleLeaveGame = () => {
+  //   disconnectSocket()
+  //   setIsConnected(false)
+  //   setPlayers([])
+  //   setCurrentPlayer({
+  //     username: 'testing',
+  //     sets: 0,
+  //     hand: [],
+  //     gameId: '',
+  //     id: '',
+  //   })
+  //   setGameId('')
+  // }
+
+  const handleJoinGame = (gameId: string) => {
+    setGameId(gameId)
+    connectSocket()
+    socket.emit(
+      'joinGame',
+      { gameId, currentPlayer, maxPlayers: numPlayers },
+      (response: Response) => {
+        response.status === 'failed'
+          ? setErrorMsg(
+              'Failed to join game. Game may already have maximum players',
+            )
+          : setErrorMsg('')
+      },
+    )
   }
-
-  const handleStartNewGame = () => {
-    setStartAGame(true)
-    const newAccessCode = generateRandomString()
-    setAccessCode(newAccessCode)
-  }
-
   return (
     <>
       <div className="app bg-lightBlue">
-        {/* Todo: make username unique */}
-        <TitleWrapper
-          started={started}
-          setStarted={setStarted}
-          resetGame={resetGame}
-        >
-          <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 h-52 md:h-80 lg:h-90 ">
-            {!startAGame && !joinGame && (
-              <Themedbutton onClick={() => setJoinGame(true)} color="darkBlue">
-                <ThemedText>Join a Game</ThemedText>
-              </Themedbutton>
-            )}
-            {!startAGame && !joinGame && (
-              <Themedbutton onClick={handleStartNewGame} color="darkBlue">
-                <ThemedText>Start a Game</ThemedText>
-              </Themedbutton>
-            )}
-            {startAGame && (
-              <div className="flex flex-col items-center">
-                <ThemedText header={true}> ACCESS CODE </ThemedText>
-                <ThemedTextInput>
-                  <ThemedText>{accessCode}</ThemedText>
-                </ThemedTextInput>
-              </div>
-            )}
-            {joinGame && (
-              <div className="flex flex-col items-center justify-center gap-1">
-                <ThemedText header={true}> Enter Access Code</ThemedText>
-                <ThemedTextInput>
-                  <input
-                    value={accessCode}
-                    className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
-                    type="text"
-                    id="accessCode"
-                    placeholder="Enter Access Code..."
-                    onChange={(e) => setAccessCode(e.target.value)}
-                  />
-                </ThemedTextInput>
-                <Themedbutton color="darkBlue" classname="my-2">
-                  {' '}
-                  Submit{' '}
-                </Themedbutton>
-              </div>
-            )}
-          </ThemedContainer>
-          {/* <SocketIo username="Jen" /> */}
-        </TitleWrapper>
+        <p>{errorMsg}</p>
+        {players.length !== numPlayers && (
+          <Landing
+            connectToGame={handleJoinGame}
+            numPlayersNeeded={numPlayers - players.length}
+          />
+        )}
+        {gameId && isConnected && players.length === numPlayers && (
+          <p>
+            {players[0] &&
+              players.map((player) => `${player.username} gameId: ${gameId}`)}
+          </p>
+        )}
       </div>
     </>
   )
