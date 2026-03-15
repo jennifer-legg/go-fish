@@ -4,6 +4,7 @@ import Player from '../../models/player.ts'
 import Response from '../../models/response.ts'
 import Landing from './Landing.tsx'
 import TitleWrapper from './TitleWrapper.tsx'
+import GameLayout from './GameLayout.tsx'
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -107,10 +108,7 @@ function App() {
             />
           )}
           {gameId && isConnected && players.length === numPlayers && (
-            <p>
-              {players[0] &&
-                players.map((player) => `${player.username} gameId: ${gameId}`)}
-            </p>
+            <GameLayout />
           )}
         </TitleWrapper>
       </div>
