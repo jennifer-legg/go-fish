@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react'
+import React, { ReactNode } from 'react'
 import Themedbutton from './themedUI/ThemedButton'
 import { motion } from 'motion/react'
 
@@ -14,8 +14,6 @@ export default function TitleWrapper({
   setStarted,
   resetGame,
 }: Props) {
-  // const [started, setStarted] = useState<boolean>(false)
-
   const columnStruct =
     'grid grid-cols-4 gap-[12px] md:grid-cols-8 md:gap-[12px] lg:grid-cols-12 lg:gap-[20px] min-h-screen'
   return (
