@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Player from '../../models/player.ts'
 import Response from '../../models/response.ts'
 import Landing from './Landing.tsx'
+import TitleWrapper from './TitleWrapper.tsx'
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -17,6 +18,7 @@ function App() {
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [gameId, setGameId] = useState('')
+  const [started, setStarted] = useState<boolean>(false)
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -72,6 +74,10 @@ function App() {
   //   setGameId('')
   // }
 
+  const resetGame = () => {
+    setStarted(false)
+  }
+
   const handleJoinGame = (gameId: string) => {
     setGameId(gameId)
     connectSocket()
@@ -80,9 +86,7 @@ function App() {
       { gameId, currentPlayer, maxPlayers: numPlayers },
       (response: Response) => {
         response.status === 'failed'
-          ? setErrorMsg(
-              'Failed to join game. Game may already have maximum players',
-            )
+          ? setErrorMsg('Unable to join game, max players reached')
           : setErrorMsg('')
       },
     )
@@ -90,19 +94,25 @@ function App() {
   return (
     <>
       <div className="app bg-lightBlue">
-        <p>{errorMsg}</p>
-        {players.length !== numPlayers && (
-          <Landing
-            connectToGame={handleJoinGame}
-            numPlayersNeeded={numPlayers - players.length}
-          />
-        )}
-        {gameId && isConnected && players.length === numPlayers && (
-          <p>
-            {players[0] &&
-              players.map((player) => `${player.username} gameId: ${gameId}`)}
-          </p>
-        )}
+        <TitleWrapper
+          started={started}
+          setStarted={setStarted}
+          resetGame={resetGame}
+        >
+          {players.length !== numPlayers && (
+            <Landing
+              connectToGame={handleJoinGame}
+              numPlayersNeeded={numPlayers - players.length}
+              errorMsg={errorMsg}
+            />
+          )}
+          {gameId && isConnected && players.length === numPlayers && (
+            <p>
+              {players[0] &&
+                players.map((player) => `${player.username} gameId: ${gameId}`)}
+            </p>
+          )}
+        </TitleWrapper>
       </div>
     </>
   )
