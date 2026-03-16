@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import ThemedText from './ThemedText'
 
 interface Props {
   leftAligned: boolean
@@ -14,18 +15,22 @@ export default function ThemedSpeechBubble({ leftAligned, children }: Props) {
   return (
     <>
       <div
-        className={`flex items-center ${leftAligned ? 'justify-start' : 'justify-end'} `}
+        className={`flex items-center ${leftAligned ? 'justify-start' : 'justify-end'} m-2 `}
       >
         {leftAligned && (
           <>
-            <div className={bubble}>{children}</div>
+            <div className={bubble}>
+              <ThemedText>{children}</ThemedText>
+            </div>
             <div className={leftTail}></div>
           </>
         )}
         {!leftAligned && (
           <>
             <div className={rightTail}></div>
-            <div className={bubble}>{children}</div>
+            <div className={bubble}>
+              <ThemedText>{children}</ThemedText>
+            </div>
           </>
         )}
       </div>
