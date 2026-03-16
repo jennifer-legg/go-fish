@@ -100,7 +100,7 @@ function App() {
           setStarted={setStarted}
           resetGame={resetGame}
         >
-          {players.length !== numPlayers && (
+          {/* {players.length !== numPlayers && (
             <Landing
               connectToGame={handleJoinGame}
               numPlayersNeeded={numPlayers - players.length}
@@ -109,7 +109,8 @@ function App() {
           )}
           {gameId && isConnected && players.length === numPlayers && (
             <GameLayout />
-          )}
+          )} */}
+          <GameLayout />
         </TitleWrapper>
       </div>
     </>

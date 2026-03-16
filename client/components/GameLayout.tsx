@@ -1,3 +1,6 @@
+import Avatar from './Avatar'
+import Chat from './Chat'
+
 export default function GameLayout() {
   const columnStruct =
     'grid grid-cols-4 gap-[8px] md:grid-cols-8 md:gap-[8px] min-h-screen grid-rows-6'
@@ -6,7 +9,9 @@ export default function GameLayout() {
       <div
         id="speech"
         className="border border-gray-400 bg-white md:col-span-2 md:row-span-4"
-      ></div>
+      >
+        <Chat />
+      </div>
       <div
         id="opponent"
         className="border border-gray-400 bg-white md:col-span-5"
@@ -28,7 +33,9 @@ export default function GameLayout() {
       <div
         id="avatar"
         className="border border-gray-400 bg-white md:col-span-2 md:row-span-2"
-      ></div>
+      >
+        <Avatar />
+      </div>
     </div>
   )
 }
