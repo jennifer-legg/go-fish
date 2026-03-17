@@ -14,13 +14,11 @@ export default function Pond() {
       </Themedbutton>
 
       <div className="h-full">
-        <div className="h-full">
-          <img
-            src="https://deckofcardsapi.com/static/img/back.png"
-            alt="Card back"
-            className=""
-          />
-        </div>
+        <img
+          src="https://deckofcardsapi.com/static/img/back.png"
+          alt="Card back"
+          className=""
+        />
       </div>
     </div>
   )
