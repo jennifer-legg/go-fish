@@ -6,7 +6,7 @@ export default function Score() {
     { username: 'you', sets: '1' },
   ]
   return (
-    <ThemedContainer classname="md:rounded-2xl gap-0 h-full">
+    <ThemedContainer classname="md:rounded-2xl lg:rounded-2xl md:gap-0 lg:gap-0 h-full">
       <p className="pt-[8px]">Score</p>
       <ul className="pb-[8px] text-black md:text-[16px] lg:text-[16px]">
         {score.map((item) => (
