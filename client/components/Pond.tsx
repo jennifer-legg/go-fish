@@ -9,17 +9,15 @@ export default function Pond() {
         <img
           src="../../images/frog-fishing.svg"
           alt="Frog fishing in a pond"
-          className="mx-auto block h-auto w-3/5 rounded-md"
+          className="mx-auto block h-4/5 w-auto rounded-md"
         />{' '}
       </Themedbutton>
 
-      <div className="h-full">
-        <img
-          src="https://deckofcardsapi.com/static/img/back.png"
-          alt="Card back"
-          className=""
-        />
-      </div>
+      <img
+        src="https://deckofcardsapi.com/static/img/back.png"
+        alt="Card back"
+        className="h-full w-auto"
+      />
     </div>
   )
 }

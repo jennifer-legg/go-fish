@@ -1,13 +1,14 @@
 import Avatar from './Avatar'
 import Chat from './Chat'
 import Dashboard from './Dashboard'
+import Opponent from './Opponent'
 import Pond from './Pond'
 
 export default function GameLayout() {
   const columnStruct =
     'grid grid-cols-4 gap-[8px] md:grid-cols-8 md:gap-[8px]  grid-rows-6'
   return (
-    <div className={`${columnStruct} h-full w-full`}>
+    <div className={`${columnStruct} h-screen w-full`}>
       <div
         id="speech"
         className="border border-gray-400 bg-white md:col-span-2 md:row-span-4"
@@ -15,9 +16,17 @@ export default function GameLayout() {
         <Chat />
       </div>
       <div
+        id="opponentAvatar"
+        className="border border-gray-400 bg-white md:col-span-1"
+      >
+        <Avatar />
+      </div>
+      <div
         id="opponent"
-        className="border border-gray-400 bg-white md:col-span-5"
-      ></div>
+        className="border border-gray-400 bg-white md:col-span-4"
+      >
+        <Opponent />
+      </div>
       <div
         id="score"
         className="border border-gray-400 bg-white md:col-span-1"

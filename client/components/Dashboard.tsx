@@ -6,10 +6,10 @@ export default function Dashboard() {
   const gameMessage = 'Message goes here'
   const hand = firstHand2Players
   return (
-    <ThemedContainer>
+    <ThemedContainer classname="h-full">
       <ThemedContainer
         color="darkBlue"
-        classname="w-full h-2/5 md:rounded-t-large md:rounded-b-none"
+        classname="w-full h-1/5 md:rounded-t-large md:rounded-b-none"
       >
         <ThemedText>{gameMessage}</ThemedText>
       </ThemedContainer>

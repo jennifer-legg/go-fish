@@ -2,8 +2,8 @@ import ThemedContainer from './themedUI/ThemedContainer'
 
 export default function Avatar() {
   return (
-    <ThemedContainer color="darkBlue">
-      <img src="/images/fish.svg" alt="Your avatar" />
+    <ThemedContainer color="darkBlue" classname="h-full">
+      <img src="../images/Fish.svg" alt="Your avatar" />
     </ThemedContainer>
   )
 }
