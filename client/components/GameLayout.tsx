@@ -19,7 +19,7 @@ export default function GameLayout() {
         id="opponentAvatar"
         className="border border-gray-400 bg-white md:col-span-1"
       >
-        <Avatar />
+        <Avatar username="Opponent" />
       </div>
       <div
         id="opponent"
@@ -49,7 +49,7 @@ export default function GameLayout() {
         id="avatar"
         className="border border-gray-400 bg-white md:col-span-2 md:row-span-2"
       >
-        <Avatar />
+        <Avatar username="You" />
       </div>
     </div>
   )
