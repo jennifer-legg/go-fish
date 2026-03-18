@@ -9,7 +9,7 @@ export default function Opponent() {
       <ThemedContainer
         color="darkBlue"
         vertical={false}
-        classname="w-full px-[24px] gap-[8px] h-full"
+        classname="w-full px-[8px] gap-[2px] h-full md:rounded-2xl lg:rounded-2xl"
       >
         {emptyArr.map((_, index) => (
           <div key={index}>

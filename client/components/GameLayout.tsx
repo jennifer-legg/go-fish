@@ -3,6 +3,7 @@ import Chat from './Chat'
 import Dashboard from './Dashboard'
 import Opponent from './Opponent'
 import Pond from './Pond'
+import Score from './Score'
 
 export default function GameLayout() {
   const columnStruct =
@@ -11,44 +12,32 @@ export default function GameLayout() {
     <div className={`${columnStruct} h-screen w-full`}>
       <div
         id="speech"
-        className="border border-gray-400 bg-white md:col-span-2 md:row-span-4"
+        className=" bg-white md:col-span-2 md:row-span-4 md:rounded-xl"
       >
         <Chat />
       </div>
-      <div
-        id="opponentAvatar"
-        className="border border-gray-400 bg-white md:col-span-1"
-      >
+
+      <div id="opponentAvatar" className=" md:col-span-1">
         <Avatar username="Opponent" />
       </div>
-      <div
-        id="opponent"
-        className="border border-gray-400 bg-white md:col-span-4"
-      >
+
+      <div id="opponent" className=" md:col-span-3">
         <Opponent />
       </div>
-      <div
-        id="score"
-        className="border border-gray-400 bg-white md:col-span-1"
-      ></div>
 
-      <div
-        id="pond"
-        className="box-border border border-gray-400 bg-white md:col-span-5 md:row-span-2"
-      >
+      <div id="score" className="md:col-span-2">
+        <Score />
+      </div>
+
+      <div id="pond" className=" md:col-span-6 md:row-span-2">
         <Pond />
       </div>
 
-      <div
-        id="dashboard"
-        className="border border-gray-400 bg-white md:col-span-6 md:row-span-3"
-      >
+      <div id="dashboard" className=" md:col-span-6 md:row-span-3">
         <Dashboard />
       </div>
-      <div
-        id="avatar"
-        className="border border-gray-400 bg-white md:col-span-2 md:row-span-2"
-      >
+
+      <div id="avatar" className=" md:col-span-2 md:row-span-2">
         <Avatar username="You" />
       </div>
     </div>
