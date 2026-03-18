@@ -10,10 +10,7 @@ export default function GameLayout() {
     'grid grid-cols-4 gap-[8px] md:grid-cols-8 md:gap-[8px]  grid-rows-6'
   return (
     <div className={`${columnStruct} h-screen w-full`}>
-      <div
-        id="speech"
-        className=" bg-white md:col-span-2 md:row-span-4 md:rounded-xl"
-      >
+      <div id="speech" className="md:col-span-2 md:row-span-4 md:rounded-xl">
         <Chat />
       </div>
 
