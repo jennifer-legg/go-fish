@@ -134,7 +134,9 @@ function App() {
               />
             }
             opponent={<Opponent numRivalCards={8} />}
-            pond={<Pond />}
+            pond={
+              <Pond currentCard={null} buttonDisabled={true} getNewCard={} />
+            }
           />
         </TitleWrapper>
       </div>
