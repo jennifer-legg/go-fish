@@ -100,6 +100,12 @@ function App() {
       },
     )
   }
+
+  //Todo - implement functionality
+  const handleGetNewCard = () => {
+    console.log('Get new card')
+  }
+
   return (
     <>
       <div className="app bg-lightBlue">
@@ -135,7 +141,11 @@ function App() {
             }
             opponent={<Opponent numRivalCards={8} />}
             pond={
-              <Pond currentCard={null} buttonDisabled={true} getNewCard={} />
+              <Pond
+                currentCard={null}
+                buttonDisabled={true}
+                getNewCard={handleGetNewCard}
+              />
             }
           />
         </TitleWrapper>
