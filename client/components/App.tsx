@@ -114,7 +114,7 @@ function App() {
           setStarted={setStarted}
           resetGame={resetGame}
         >
-          {/* {players.length !== numPlayers && (
+          {players.length !== numPlayers && (
             <Landing
               connectToGame={handleJoinGame}
               numPlayersNeeded={numPlayers - players.length}
@@ -122,32 +122,31 @@ function App() {
             />
           )}
           {gameId && isConnected && players.length === numPlayers && (
-            <GameLayout />
-          )} */}
-          <GameLayout
-            avatarRival={<Avatar isChangeable={false} username="Opponent" />}
-            avatarUser={<Avatar isChangeable={true} username="You" />}
-            chat={<Chat userMsg="hi" rivalMsg="hello" />}
-            dashboard={
-              <Dashboard hand={firstHand2Players} gameMessage={gameMessage} />
-            }
-            score={
-              <ScoreBoard
-                scores={[
-                  { username: 'opponent', sets: 2 },
-                  { username: 'you', sets: 1 },
-                ]}
-              />
-            }
-            opponent={<Opponent numRivalCards={8} />}
-            pond={
-              <Pond
-                currentCard={null}
-                buttonDisabled={true}
-                getNewCard={handleGetNewCard}
-              />
-            }
-          />
+            <GameLayout
+              avatarRival={<Avatar isChangeable={false} username="Opponent" />}
+              avatarUser={<Avatar isChangeable={true} username="You" />}
+              chat={<Chat userMsg="hi" rivalMsg="hello" />}
+              dashboard={
+                <Dashboard hand={firstHand2Players} gameMessage={gameMessage} />
+              }
+              score={
+                <ScoreBoard
+                  scores={[
+                    { username: 'opponent', sets: 2 },
+                    { username: 'you', sets: 1 },
+                  ]}
+                />
+              }
+              opponent={<Opponent numRivalCards={8} />}
+              pond={
+                <Pond
+                  currentCard={null}
+                  buttonDisabled={true}
+                  getNewCard={handleGetNewCard}
+                />
+              }
+            />
+          )}
         </TitleWrapper>
       </div>
     </>
