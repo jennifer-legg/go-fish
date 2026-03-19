@@ -5,6 +5,12 @@ import Response from '../../models/response.ts'
 import Landing from './Landing.tsx'
 import TitleWrapper from './TitleWrapper.tsx'
 import GameLayout from './GameLayout.tsx'
+import Avatar from './Avatar.tsx'
+import Chat from './Chat.tsx'
+import Dashboard from './Dashboard.tsx'
+import Score from './Score.tsx'
+import Opponent from './Opponent.tsx'
+import Pond from './Pond.tsx'
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -110,7 +116,15 @@ function App() {
           {gameId && isConnected && players.length === numPlayers && (
             <GameLayout />
           )} */}
-          <GameLayout />
+          <GameLayout
+            avatarRival={<Avatar isChangeable={false} username="Opponent" />}
+            avatarUser={<Avatar isChangeable={true} username="You" />}
+            chat={<Chat />}
+            dashboard={<Dashboard />}
+            score={<Score />}
+            opponent={<Opponent />}
+            pond={<Pond />}
+          />
         </TitleWrapper>
       </div>
     </>

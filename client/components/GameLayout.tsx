@@ -1,41 +1,54 @@
-import Avatar from './Avatar'
-import Chat from './Chat'
-import Dashboard from './Dashboard'
-import Opponent from './Opponent'
-import Pond from './Pond'
-import Score from './Score'
+import { ReactNode } from 'react'
 
-export default function GameLayout() {
+interface Props {
+  chat: ReactNode
+  avatarUser: ReactNode
+  dashboard: ReactNode
+  opponent: ReactNode
+  pond: ReactNode
+  score: ReactNode
+  avatarRival: ReactNode
+}
+
+export default function GameLayout({
+  chat,
+  avatarUser,
+  dashboard,
+  opponent,
+  pond,
+  score,
+  avatarRival,
+}: Props) {
   const columnStruct =
     'grid grid-cols-4 gap-[8px] md:grid-cols-8 md:gap-[8px]  grid-rows-6'
   return (
     <div className={`${columnStruct} h-screen w-full`}>
       <div id="speech" className="md:col-span-2 md:row-span-4 md:rounded-xl">
-        <Chat />
+        {chat}
       </div>
 
-      <div id="opponentAvatar" className=" md:col-span-1">
-        <Avatar isChangeable={false} username="Opponent" />
+      <div id="avatarRival" className=" md:col-span-1">
+        {avatarRival}
       </div>
 
       <div id="opponent" className=" md:col-span-3">
-        <Opponent />
+        {opponent}
       </div>
 
       <div id="score" className="md:col-span-2">
-        <Score />
+        {score}
       </div>
 
       <div id="pond" className=" md:col-span-6 md:row-span-2">
-        <Pond />
+        {pond}
       </div>
 
       <div id="dashboard" className=" md:col-span-6 md:row-span-3">
-        <Dashboard />
+        {dashboard}
       </div>
 
-      <div id="avatar" className=" md:col-span-2 md:row-span-2">
-        <Avatar isChangeable={true} username="You" />
+      <div id="avatarUser" className=" md:col-span-2 md:row-span-2">
+        {avatarUser}
       </div>
     </div>
   )
