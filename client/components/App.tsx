@@ -8,9 +8,10 @@ import GameLayout from './GameLayout.tsx'
 import Avatar from './Avatar.tsx'
 import Chat from './Chat.tsx'
 import Dashboard from './Dashboard.tsx'
-import Score from './Score.tsx'
+import ScoreBoard from './ScoreBoard.tsx'
 import Opponent from './Opponent.tsx'
 import Pond from './Pond.tsx'
+import { firstHand2Players } from '../../data/deckExample'
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -24,8 +25,9 @@ function App() {
     id: '',
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
-  const [gameId, setGameId] = useState('')
+  const [gameId, setGameId] = useState<string>('')
   const [started, setStarted] = useState<boolean>(false)
+  const [gameMessage, setGameMessage] = useState<string>('')
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -119,10 +121,19 @@ function App() {
           <GameLayout
             avatarRival={<Avatar isChangeable={false} username="Opponent" />}
             avatarUser={<Avatar isChangeable={true} username="You" />}
-            chat={<Chat />}
-            dashboard={<Dashboard />}
-            score={<Score />}
-            opponent={<Opponent />}
+            chat={<Chat userMsg="hi" rivalMsg="hello" />}
+            dashboard={
+              <Dashboard hand={firstHand2Players} gameMessage={gameMessage} />
+            }
+            score={
+              <ScoreBoard
+                scores={[
+                  { username: 'opponent', sets: 2 },
+                  { username: 'you', sets: 1 },
+                ]}
+              />
+            }
+            opponent={<Opponent numRivalCards={8} />}
             pond={<Pond />}
           />
         </TitleWrapper>

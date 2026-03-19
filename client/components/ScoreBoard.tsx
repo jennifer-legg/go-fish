@@ -1,15 +1,16 @@
+import { Score } from '../../models/player'
 import ThemedContainer from './themedUI/ThemedContainer'
 
-export default function Score() {
-  const score = [
-    { username: 'opponent', sets: 2 },
-    { username: 'you', sets: '1' },
-  ]
+interface Props {
+  scores: Score[]
+}
+
+export default function ScoreBoard({ scores }: Props) {
   return (
     <ThemedContainer classname="md:rounded-2xl lg:rounded-2xl md:gap-0 lg:gap-0 h-full">
       <p className="pt-[8px]">Score</p>
       <ul className="pb-[8px] text-black md:text-[16px] lg:text-[16px]">
-        {score.map((item) => (
+        {scores.map((item) => (
           <li key={item.username}>
             {item.username}: {item.sets}
           </li>

@@ -1,8 +1,11 @@
 import ThemedContainer from './themedUI/ThemedContainer'
 
-export default function Opponent() {
-  const oppNumCards = 8
-  const emptyArr = Array(oppNumCards).fill('')
+interface Props {
+  numRivalCards: number
+}
+
+export default function Opponent({ numRivalCards }: Props) {
+  const emptyArr = Array(numRivalCards).fill('')
 
   return (
     <>

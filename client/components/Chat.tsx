@@ -1,12 +1,15 @@
 import ThemedSpeechBubble from './themedUI/ThemedSpeechBubble'
 
-export default function Chat() {
-  const opponentSays = 'Hello'
-  const youSay = 'Hi'
+interface Props {
+  userMsg: string
+  rivalMsg: string
+}
+
+export default function Chat({ userMsg, rivalMsg }: Props) {
   return (
     <>
-      <ThemedSpeechBubble leftAligned={true}>{opponentSays}</ThemedSpeechBubble>
-      <ThemedSpeechBubble leftAligned={false}>{youSay}</ThemedSpeechBubble>
+      <ThemedSpeechBubble leftAligned={true}>{userMsg}</ThemedSpeechBubble>
+      <ThemedSpeechBubble leftAligned={false}>{rivalMsg}</ThemedSpeechBubble>
     </>
   )
 }

@@ -1,10 +1,13 @@
 import ThemedContainer from './themedUI/ThemedContainer'
 import ThemedText from './themedUI/ThemedText'
-import { firstHand2Players } from '../../data/deckExample'
+import { Card } from '../../models/deck'
 
-export default function Dashboard() {
-  const gameMessage = 'Message goes here'
-  const hand = firstHand2Players
+interface Props {
+  gameMessage: string
+  hand: Card[]
+}
+
+export default function Dashboard({ gameMessage, hand }: Props) {
   return (
     <ThemedContainer classname="h-full md:rounded-b-none lg:rounded-b-none">
       <ThemedContainer
