@@ -15,7 +15,7 @@ export default function GameLayout() {
       </div>
 
       <div id="opponentAvatar" className=" md:col-span-1">
-        <Avatar username="Opponent" />
+        <Avatar isChangeable={false} username="Opponent" />
       </div>
 
       <div id="opponent" className=" md:col-span-3">
@@ -35,7 +35,7 @@ export default function GameLayout() {
       </div>
 
       <div id="avatar" className=" md:col-span-2 md:row-span-2">
-        <Avatar username="You" />
+        <Avatar isChangeable={true} username="You" />
       </div>
     </div>
   )
