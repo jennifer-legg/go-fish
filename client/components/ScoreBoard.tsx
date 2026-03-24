@@ -1,5 +1,6 @@
 import { Score } from '../../models/player'
 import ThemedContainer from './themedUI/ThemedContainer'
+import ThemedText from './themedUI/ThemedText'
 
 interface Props {
   scores: Score[]
@@ -7,12 +8,14 @@ interface Props {
 
 export default function ScoreBoard({ scores }: Props) {
   return (
-    <ThemedContainer classname="md:rounded-2xl lg:rounded-2xl md:gap-0 lg:gap-0 h-full">
-      <p className="pt-[8px]">Score</p>
-      <ul className="pb-[8px] text-black md:text-[16px] lg:text-[16px]">
+    <ThemedContainer classname="lg:rounded-[24px] md:gap-0 lg:gap-0 h-full lg:py-[8px] ">
+      <ThemedText secondary={true}>Score</ThemedText>
+      <ul className="text-black">
         {scores.map((item) => (
           <li key={item.username}>
-            {item.username}: {item.sets}
+            <ThemedText
+              secondary={true}
+            >{`${item.username}: ${item.sets}`}</ThemedText>
           </li>
         ))}
       </ul>
