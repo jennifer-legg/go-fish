@@ -8,7 +8,7 @@ interface Props {
 
 export default function ThemedSpeechBubble({ leftAligned, children }: Props) {
   const tail =
-    'w-0 border-white border-r-[20px] border-t-[20px] border-b-transparent  border-r-transparent'
+    'w-0 border-white border-r-[24px] border-t-[24px] border-b-transparent  border-r-transparent'
   const bubble = 'relative h-4/5 w-36 rounded-lg bg-white text-center'
   return (
     <>
@@ -18,8 +18,7 @@ export default function ThemedSpeechBubble({ leftAligned, children }: Props) {
         <div className={bubble}>
           <ThemedText>{children}</ThemedText>
         </div>
-        {leftAligned && <div className={tail}></div>}
-        {!leftAligned && <div className={tail}></div>}
+        <div className={tail}></div>
       </div>
     </>
   )
