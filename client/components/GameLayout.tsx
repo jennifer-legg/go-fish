@@ -7,7 +7,6 @@ interface Props {
   opponent: ReactNode
   pond: ReactNode
   score: ReactNode
-  avatarRival: ReactNode
 }
 
 export default function GameLayout({
