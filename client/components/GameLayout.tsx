@@ -17,7 +17,6 @@ export default function GameLayout({
   opponent,
   pond,
   score,
-  avatarRival,
 }: Props) {
   const columnStruct =
     'grid grid-cols-4 gap-[8px] md:grid-cols-8 md:gap-[8px]  grid-rows-6'
@@ -27,11 +26,7 @@ export default function GameLayout({
         {chat}
       </div>
 
-      <div id="avatarRival" className=" md:col-span-1">
-        {avatarRival}
-      </div>
-
-      <div id="opponent" className=" md:col-span-3">
+      <div id="opponent" className=" md:col-span-4">
         {opponent}
       </div>
 

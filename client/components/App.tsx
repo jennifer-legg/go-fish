@@ -137,7 +137,13 @@ function App() {
                 ]}
               />
             }
-            opponent={<Opponent numRivalCards={8} />}
+            opponent={
+              <Opponent
+                numRivalCards={8}
+                username="opponent"
+                avatar="../images/Fish.svg"
+              />
+            }
             pond={
               <Pond
                 currentCard={null}

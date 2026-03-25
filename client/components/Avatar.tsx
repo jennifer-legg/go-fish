@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import ThemedContainer from './themedUI/ThemedContainer'
+import ThemedText from './themedUI/ThemedText'
 
 interface Props {
   username: string
-  isChangeable: boolean
 }
-export default function Avatar({ username, isChangeable }: Props) {
+export default function Avatar({ username }: Props) {
   const [imgIndex, setImgIndex] = useState(0)
 
   const image = [
@@ -28,7 +28,7 @@ export default function Avatar({ username, isChangeable }: Props) {
   return (
     <ThemedContainer color="darkBlue" classname="h-full p-[16px] gap-[8px]">
       <div className="flex  ">
-        {imgIndex > 0 && isChangeable && (
+        {imgIndex > 0 && (
           <button
             onClick={(e) => handleClick(e, imgIndex)}
             id="previous"
@@ -37,15 +37,15 @@ export default function Avatar({ username, isChangeable }: Props) {
             <img src="../images/arrow.svg" alt="Previous avatar" />
           </button>
         )}
-        {imgIndex === 0 && isChangeable && <div className="w-1/5"></div>}
-        <div className={`${isChangeable ? 'aspect-square w-[70%]' : 'w-full'}`}>
+        {imgIndex === 0 && <div className="w-1/5"></div>}
+        <div className="aspect-square w-[70%]">
           <img
             className="h-full w-full object-cover"
             src={image[imgIndex]}
             alt="Your avatar"
           />
         </div>
-        {imgIndex < image.length - 1 && isChangeable && (
+        {imgIndex < image.length - 1 && (
           <button
             onClick={(e) => handleClick(e, imgIndex)}
             id="next"
@@ -58,12 +58,9 @@ export default function Avatar({ username, isChangeable }: Props) {
             />
           </button>
         )}
-        {imgIndex >= image.length - 1 && isChangeable && (
-          <div className="w-1/5"></div>
-        )}
+        {imgIndex >= image.length - 1 && <div className="w-1/5"></div>}
       </div>
-
-      <p>{username}</p>
+      <ThemedText secondary={true}>{username}</ThemedText>
     </ThemedContainer>
   )
 }
