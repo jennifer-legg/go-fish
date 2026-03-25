@@ -12,23 +12,6 @@ export interface Card {
     svg: string
     png: string
   }
-  value: Value
-  suit: Suit
+  value: string
+  suit: string
 }
-
-type Suit = 'SPADES' | 'DIAMONDS' | 'HEARTS' | 'CLUBS'
-
-type Value =
-  | 'ACE'
-  | 'KING'
-  | 'QUEEN'
-  | 'JACK'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9'
-  | '10'

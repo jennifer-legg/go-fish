@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import Themedbutton from './themedUI/ThemedButton.tsx'
-import ThemedContainer from './themedUI/ThemedContainer.tsx'
-import ThemedText from './themedUI/ThemedText.tsx'
-import ThemedTextInput from './themedUI/ThemedTextInput.tsx'
-import generateRandomString from '../util/generateRandomString.ts'
-import Loading from './Loading.tsx'
+import Themedbutton from '../themedUI/ThemedButton.tsx'
+import ThemedContainer from '../themedUI/ThemedContainer.tsx'
+import ThemedText from '../themedUI/ThemedText.tsx'
+import ThemedTextInput from '../themedUI/ThemedTextInput.tsx'
+import generateRandomString from '../../util/generateRandomString.ts'
+import Loading from '../Loading.tsx'
 
 interface Props {
   connectToGame: (gameId: string) => void

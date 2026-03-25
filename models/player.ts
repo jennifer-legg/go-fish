@@ -11,3 +11,8 @@ export default interface Player {
 export interface PlayerCollection {
   [key: string]: Player
 }
+
+export interface Score {
+  username: string
+  sets: number
+}
