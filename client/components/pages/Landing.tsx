@@ -7,13 +7,15 @@ import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
 
 interface Props {
-  connectToGame: (gameId: string, username: string) => void
+  handleJoinGame: (gameId: string, username: string) => void
+  handleStartGame: (gameId: string, username: string) => void
   numPlayersNeeded: number
   errorMsg: string
 }
 
 export default function Landing({
-  connectToGame,
+  handleJoinGame,
+  handleStartGame,
   numPlayersNeeded,
   errorMsg,
 }: Props) {
@@ -37,12 +39,12 @@ export default function Landing({
   }
 
   const handleConnectToNewGame = () => {
-    connectToGame(accessCode, username.trim())
+    handleStartGame(accessCode, username.trim())
     setWaitingForPlayer(true)
   }
 
   const handleJoinEstablishedGame = () => {
-    connectToGame(accessCode, username.trim())
+    handleJoinGame(accessCode, username.trim())
   }
 
   return (

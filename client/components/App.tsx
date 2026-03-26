@@ -105,6 +105,24 @@ function App() {
     )
   }
 
+  const handleStartGame = (gameId: string, username: string) => {
+    const updatedPlayer = { ...currentPlayer, username }
+    setCurrentPlayer(updatedPlayer)
+    setGameId(gameId)
+    connectSocket()
+    socket.emit(
+      'startGame',
+      { gameId, currentPlayer: updatedPlayer, maxPlayers: numPlayers },
+      (response: Response) => {
+        response.status === 'failed'
+          ? setErrorMsg(
+              response.reason ? response.reason : 'Error starting game.',
+            )
+          : setErrorMsg('')
+      },
+    )
+  }
+
   //Todo - implement functionality
   const handleGetNewCard = () => {
     console.log('Get new card')
@@ -120,7 +138,8 @@ function App() {
         >
           {players.length !== numPlayers && (
             <Landing
-              connectToGame={handleJoinGame}
+              handleJoinGame={handleJoinGame}
+              handleStartGame={handleStartGame}
               numPlayersNeeded={numPlayers - players.length}
               errorMsg={errorMsg}
             />
