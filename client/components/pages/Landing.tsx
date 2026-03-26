@@ -47,7 +47,7 @@ export default function Landing({
 
   return (
     <>
-      <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 h-52 md:h-80 lg:h-90 ">
+      <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 lg:w-3/5 h-fit p-8 ">
         {!startAGame && !joinGame && (
           <Themedbutton onClick={() => setJoinGame(true)} color="darkBlue">
             <ThemedText>Join a Game</ThemedText>
@@ -90,7 +90,7 @@ export default function Landing({
         )}
         {joinGame && (
           <div className="flex flex-col items-center justify-center gap-1">
-            <ThemedText header={true}> Enter Access Code</ThemedText>
+            <ThemedText> Enter Access Code</ThemedText>
             <ThemedTextInput>
               <input
                 value={accessCode}
@@ -105,13 +105,14 @@ export default function Landing({
             <ThemedText classname="text-center">
               {errorMsg ? errorMsg : ''}
             </ThemedText>
-            <ThemedText header={true}> Enter Username</ThemedText>
+            <ThemedText> Enter Username</ThemedText>
             <ThemedTextInput>
               <input
                 type="text"
                 name="username"
                 value={username}
                 id="username"
+                placeholder="Enter Username..."
                 onChange={(e) => setUsername(e.target.value)}
                 maxLength={15}
                 className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
