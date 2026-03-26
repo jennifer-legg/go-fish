@@ -7,6 +7,7 @@ interface Props {
   classname?: string
   onClick?: MouseEventHandler<HTMLButtonElement>
   color?: buttonColor
+  isDisabled?: boolean
 }
 
 export default function Themedbutton({
@@ -14,6 +15,7 @@ export default function Themedbutton({
   children,
   classname = '',
   color = 'orange',
+  isDisabled = false,
 }: Props) {
   const transition = {
     type: 'spring',
@@ -29,7 +31,8 @@ export default function Themedbutton({
       whileTap={{ scale: 0.8 }}
       whileHover={{ opacity: 0.8 }}
       onClick={onClick}
-      className={`w-44 rounded-full py-2 font-slackey text-[24px] text-whiteText shadow-md shadow-gray-600 md:w-[368px] md:text-[48px] lg:w-[368px] lg:text-[48px] ${classname} cursor-pointer  ${color === 'orange' ? 'bg-fishOrange ' : 'bg-darkBlue'}`}
+      disabled={isDisabled}
+      className={`w-44 rounded-full py-2 font-slackey text-[24px] text-whiteText shadow-md shadow-gray-600 md:w-[368px] md:text-[48px] lg:w-[368px] lg:text-[48px] ${classname}   ${isDisabled ? 'cursor-not-allowed bg-gray-500' : color === 'orange' ? 'cursor-pointer bg-fishOrange' : 'cursor-pointer bg-darkBlue'}`}
     >
       {children}
     </motion.button>
