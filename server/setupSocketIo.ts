@@ -13,9 +13,12 @@ export default function setupSocketIO(io: Server): void {
     //When a player joins a game (a socket io room)
     socket.on('joinGame', ({ gameId, currentPlayer, maxPlayers }, callBack) => {
       //Check if the game has less than the specified number of players, adds player if not at max
+      //and if the username is not already taken
+      //--Todo check if username taken--
       const roomSize: number = Object.values(players).filter(
         (player) => player.gameId === gameId,
       ).length
+
       if (roomSize < maxPlayers) {
         //Add player to storage
         const updatedPlayer: Player = {

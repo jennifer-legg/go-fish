@@ -27,7 +27,7 @@ function App() {
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [gameId, setGameId] = useState<string>('')
   const [started, setStarted] = useState<boolean>(false)
-  const [gameMessage, setGameMessage] = useState<string>('')
+  const [gameMessage] = useState<string>('')
 
   useEffect(() => {
     socket.on('connect', () => {
