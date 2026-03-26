@@ -12,14 +12,17 @@ export default function setupSocketIO(io: Server): void {
 
     //When a player joins a game (a socket io room)
     socket.on('joinGame', ({ gameId, currentPlayer, maxPlayers }, callBack) => {
-      //Check if the game has less than the specified number of players, adds player if not at max
-      //and if the username is not already taken
-      //--Todo check if username taken--
-      const roomSize: number = Object.values(players).filter(
+      //Check if the username is in use and if the game has less than the specified number of players,
+      // adds player if not at max
+      const playersInGame = Object.values(players).filter(
         (player) => player.gameId === gameId,
-      ).length
-
-      if (roomSize < maxPlayers) {
+      )
+      const usernameTaken =
+        playersInGame.filter(
+          (player) => player.username === currentPlayer.username,
+        ).length >= 1
+      //Check if room has less than max players and if username is taken
+      if (playersInGame.length < maxPlayers && !usernameTaken) {
         //Add player to storage
         const updatedPlayer: Player = {
           ...currentPlayer,
@@ -27,23 +30,28 @@ export default function setupSocketIO(io: Server): void {
           id: socket.id,
         }
         players[socket.id] = updatedPlayer
-        //Join the specified game if game has less than specified number of players
+
+        //Join the specified game
         socket.join(gameId)
 
         //Notify other players in the game about the new player
         io.to(gameId).emit('playerJoinedGame', updatedPlayer)
 
         //Send updated player list to all users in the room
-        const playersInGame: Player[] = Object.values(players).filter(
+        const updatedPlayersInGame: Player[] = Object.values(players).filter(
           (player) => player.gameId === gameId,
         )
-        io.to(gameId).emit('players', playersInGame)
+        io.to(gameId).emit('players', updatedPlayersInGame)
+
         //Notify the user that the game has been joined
         const response: Response = { status: 'ok' }
         callBack(response)
       } else {
         //Notify the user that the game could not be joined and disconnect
-        const response: Response = { status: 'failed' }
+        const reason = usernameTaken
+          ? 'Unable to join game, username already in use.'
+          : 'Unable to join game, max players reached'
+        const response: Response = { status: 'failed', reason }
         callBack(response)
         socket.disconnect()
       }

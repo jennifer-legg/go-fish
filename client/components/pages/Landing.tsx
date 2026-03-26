@@ -101,10 +101,6 @@ export default function Landing({
                 onChange={(e) => setAccessCode(e.target.value)}
               />
             </ThemedTextInput>
-
-            <ThemedText classname="text-center">
-              {errorMsg ? errorMsg : ''}
-            </ThemedText>
             <ThemedText> Enter Username</ThemedText>
             <ThemedTextInput>
               <input

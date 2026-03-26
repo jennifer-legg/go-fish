@@ -87,15 +87,19 @@ function App() {
     setStarted(false)
   }
 
-  const handleJoinGame = (gameId: string) => {
+  const handleJoinGame = (gameId: string, username: string) => {
+    const updatedPlayer = { ...currentPlayer, username }
+    setCurrentPlayer(updatedPlayer)
     setGameId(gameId)
     connectSocket()
     socket.emit(
       'joinGame',
-      { gameId, currentPlayer, maxPlayers: numPlayers },
+      { gameId, currentPlayer: updatedPlayer, maxPlayers: numPlayers },
       (response: Response) => {
         response.status === 'failed'
-          ? setErrorMsg('Unable to join game, max players reached')
+          ? setErrorMsg(
+              response.reason ? response.reason : 'Error joining game.',
+            )
           : setErrorMsg('')
       },
     )
