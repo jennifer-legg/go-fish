@@ -94,7 +94,6 @@ export default function setupSocketIO(io: Server): void {
             gameStorage[gameId].playersSocketId.forEach((id, i) => {
               if (playerStorage[id].hand) {
                 playerStorage[id].hand = hands[i]
-                console.log(playerStorage[id].hand)
               }
             })
           }
