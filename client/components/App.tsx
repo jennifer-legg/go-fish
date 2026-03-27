@@ -112,7 +112,7 @@ function App() {
     connectSocket()
     socket.emit(
       'startGame',
-      { gameId, currentPlayer: updatedPlayer, maxPlayers: numPlayers },
+      { gameId, currentPlayer: updatedPlayer },
       (response: Response) => {
         response.status === 'failed'
           ? setErrorMsg(

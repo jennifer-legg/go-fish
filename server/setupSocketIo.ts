@@ -13,60 +13,54 @@ export default function setupSocketIO(io: Server): void {
     console.log(`a user connected ${socket.id}`)
 
     //When a player starts a new game
-    socket.on(
-      'startGame',
-      ({ gameId, currentPlayer, maxPlayers }, callBack) => {
-        //Check if the username is in use and if the game has less than the specified number of players,
-        // adds player if not at max
-        const playersInGame = Object.values(players).filter(
+    socket.on('startGame', ({ gameId, currentPlayer }, callBack) => {
+      //1. GameId should not already be in use
+      //2. Start new game
+      const gameIdInUse =
+        Object.values(players).filter((player) => player.gameId === gameId)
+          .length >= 1
+      if (!gameIdInUse) {
+        //Add player to storage
+        const updatedPlayer: Player = {
+          ...currentPlayer,
+          gameId,
+          id: socket.id,
+        }
+        players[socket.id] = updatedPlayer
+        console.log(players)
+
+        //Join the specified game
+        socket.join(gameId)
+
+        //Notify other players in the game about the new player
+        io.to(gameId).emit('playerJoinedGame', updatedPlayer)
+
+        //Send updated player list to all users in the room
+        const updatedPlayersInGame: Player[] = Object.values(players).filter(
           (player) => player.gameId === gameId,
         )
-        const usernameTaken =
-          playersInGame.filter(
-            (player) => player.username === currentPlayer.username,
-          ).length >= 1
-        //Check if room has less than max players and if username is taken
-        if (playersInGame.length < maxPlayers && !usernameTaken) {
-          //Add player to storage
-          const updatedPlayer: Player = {
-            ...currentPlayer,
-            gameId,
-            id: socket.id,
-          }
-          players[socket.id] = updatedPlayer
-          console.log(players)
+        io.to(gameId).emit('players', updatedPlayersInGame)
 
-          //Join the specified game
-          socket.join(gameId)
-
-          //Notify other players in the game about the new player
-          io.to(gameId).emit('playerJoinedGame', updatedPlayer)
-
-          //Send updated player list to all users in the room
-          const updatedPlayersInGame: Player[] = Object.values(players).filter(
-            (player) => player.gameId === gameId,
-          )
-          io.to(gameId).emit('players', updatedPlayersInGame)
-
-          //Notify the user that the game has been joined
-          const response: Response = { status: 'ok' }
-          callBack(response)
-        } else {
-          //Notify the user that the game could not be joined and disconnect
-          const reason = usernameTaken
-            ? 'Unable to join game, username already in use.'
-            : 'Unable to join game, max players reached'
-          const response: Response = { status: 'failed', reason }
-          callBack(response)
-          socket.disconnect()
+        //Notify the user that the game has been joined
+        const response: Response = { status: 'ok' }
+        callBack(response)
+      } else {
+        //Notify the user that the game could not be joined and disconnect
+        const response: Response = {
+          status: 'failed',
+          reason: 'Invalid access code',
         }
-      },
-    )
+        callBack(response)
+        socket.disconnect()
+      }
+    })
 
     //When a player joins a game (a socket io room)
     socket.on('joinGame', ({ gameId, currentPlayer, maxPlayers }, callBack) => {
-      //Check if the username is in use and if the game has less than the specified number of players,
-      // adds player if not at max
+      //1. Username should not be in use
+      //2. Game should have less than the specified number of players
+      //3. GameId should already be in use
+      console.log(players)
       const playersInGame = Object.values(players).filter(
         (player) => player.gameId === gameId,
       )
@@ -75,7 +69,11 @@ export default function setupSocketIO(io: Server): void {
           (player) => player.username === currentPlayer.username,
         ).length >= 1
       //Check if room has less than max players and if username is taken
-      if (playersInGame.length < maxPlayers && !usernameTaken) {
+      if (
+        playersInGame.length < maxPlayers &&
+        playersInGame.length >= 1 &&
+        !usernameTaken
+      ) {
         //Add player to storage
         const updatedPlayer: Player = {
           ...currentPlayer,
@@ -102,9 +100,13 @@ export default function setupSocketIO(io: Server): void {
         callBack(response)
       } else {
         //Notify the user that the game could not be joined and disconnect
-        const reason = usernameTaken
+        const reason: string = usernameTaken
           ? 'Unable to join game, username already in use.'
-          : 'Unable to join game, max players reached'
+          : playersInGame.length < 1
+            ? 'Invalid access code'
+            : playersInGame.length >= maxPlayers
+              ? 'Unable to join game, max players reached'
+              : 'Error joining game'
         const response: Response = { status: 'failed', reason }
         callBack(response)
         socket.disconnect()
