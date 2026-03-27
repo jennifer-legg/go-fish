@@ -132,6 +132,7 @@ export default function Landing({
               onClick={handleJoinEstablishedGame}
               color="darkBlue"
               classname="my-2"
+              isDisabled={username.trim().length < 3}
             >
               Submit
             </Themedbutton>
