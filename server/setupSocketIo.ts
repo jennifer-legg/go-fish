@@ -39,10 +39,11 @@ export default function setupSocketIO(io: Server): void {
           gameStorage[gameId] = {
             gameId,
             pond: deck.cards,
-            playersSocketId: [socket.id],
+            playersSocketId: [],
           }
+          //Add player to storage and join room
           addPlayerToGame(gameId, currentPlayer)
-          //Notify the user that the game has been joined
+          //Notify all players that the game has been joined
           notifyPlayerDetails(gameId, playerStorage[socket.id])
           callBack({ status: 'ok' })
         } else {
@@ -79,9 +80,7 @@ export default function setupSocketIO(io: Server): void {
           playersInGame.length >= 1 &&
           !usernameTaken
         ) {
-          //Add joined playersocket id to storage
-          gameStorage[gameId].playersSocketId.push(socket.id)
-          //Login player
+          //Add player to storage and join room
           addPlayerToGame(gameId, currentPlayer)
           //Deal cards to players if game at max number of players
           if (playersInGame.length + 1 === maxPlayers) {
@@ -97,7 +96,7 @@ export default function setupSocketIO(io: Server): void {
               }
             })
           }
-          //Notify the user that the game has been joined
+          //Notify all players that the game has been joined
           notifyPlayerDetails(gameId, playerStorage[socket.id])
           callBack({ status: 'ok' })
         } else {
@@ -125,6 +124,8 @@ export default function setupSocketIO(io: Server): void {
         id: socket.id,
       }
       playerStorage[socket.id] = updatedPlayer
+      //Add joined player socketid to gamestorage
+      gameStorage[gameId].playersSocketId.push(socket.id)
       //Join the specified game
       socket.join(gameId)
     }
