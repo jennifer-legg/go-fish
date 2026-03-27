@@ -5,15 +5,19 @@ import ThemedText from '../themedUI/ThemedText.tsx'
 import ThemedTextInput from '../themedUI/ThemedTextInput.tsx'
 import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
+import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
+import { Deck } from '../../../models/deck.ts'
 
 interface Props {
-  connectToGame: (gameId: string, username: string) => void
+  handleJoinGame: (gameId: string, username: string) => void
+  handleStartGame: (gameId: string, username: string, deck: Deck) => void
   numPlayersNeeded: number
   errorMsg: string
 }
 
 export default function Landing({
-  connectToGame,
+  handleJoinGame,
+  handleStartGame,
   numPlayersNeeded,
   errorMsg,
 }: Props) {
@@ -22,6 +26,7 @@ export default function Landing({
   const [accessCode, setAccessCode] = useState('')
   const [waitingForPlayer, setWaitingForPlayer] = useState(false)
   const [username, setUsername] = useState('')
+  const { data: deck, isError, isLoading } = useGetShuffledDeck()
 
   // const resetGame = () => {
   //   setAccessCode('')
@@ -31,18 +36,22 @@ export default function Landing({
   // }
 
   const handleStartNewGame = () => {
-    setStartAGame(true)
-    const newAccessCode = generateRandomString()
-    setAccessCode(newAccessCode)
+    if (deck) {
+      setStartAGame(true)
+      const newAccessCode = generateRandomString()
+      setAccessCode(newAccessCode)
+    }
   }
 
   const handleConnectToNewGame = () => {
-    connectToGame(accessCode, username.trim())
-    setWaitingForPlayer(true)
+    if (deck) {
+      handleStartGame(accessCode, username.trim(), deck)
+      setWaitingForPlayer(true)
+    }
   }
 
   const handleJoinEstablishedGame = () => {
-    connectToGame(accessCode, username.trim())
+    handleJoinGame(accessCode, username.trim())
   }
 
   return (
@@ -54,7 +63,11 @@ export default function Landing({
           </Themedbutton>
         )}
         {!startAGame && !joinGame && (
-          <Themedbutton onClick={handleStartNewGame} color="darkBlue">
+          <Themedbutton
+            onClick={handleStartNewGame}
+            color="darkBlue"
+            isDisabled={isLoading || isError}
+          >
             <ThemedText>Start a Game</ThemedText>
           </Themedbutton>
         )}
@@ -75,14 +88,17 @@ export default function Landing({
                 onChange={(e) => setUsername(e.target.value)}
               />
             </ThemedTextInput>
-            <Themedbutton
-              onClick={handleConnectToNewGame}
-              color="darkBlue"
-              classname="my-2"
-              isDisabled={username.trim().length < 3}
-            >
-              Start
-            </Themedbutton>
+            {!waitingForPlayer && (
+              <Themedbutton
+                onClick={handleConnectToNewGame}
+                color="darkBlue"
+                classname="my-2"
+                isDisabled={username.trim().length < 3}
+              >
+                Start
+              </Themedbutton>
+            )}
+
             {waitingForPlayer && (
               <Loading numPlayersNeeded={numPlayersNeeded} />
             )}
@@ -119,6 +135,7 @@ export default function Landing({
               onClick={handleJoinEstablishedGame}
               color="darkBlue"
               classname="my-2"
+              isDisabled={username.trim().length < 3}
             >
               Submit
             </Themedbutton>

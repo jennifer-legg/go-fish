@@ -9,10 +9,12 @@ export default interface Player {
 }
 
 export interface PlayerCollection {
-  [key: string]: Player
+  [key: SocketId]: Player
 }
 
 export interface Score {
   username: string
   sets: number
 }
+
+type SocketId = string

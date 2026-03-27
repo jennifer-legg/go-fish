@@ -12,6 +12,7 @@ import ScoreBoard from './ScoreBoard.tsx'
 import Opponent from './Opponent.tsx'
 import Pond from './Pond.tsx'
 import { firstHand2Players } from '../../data/deckExample'
+import { Deck } from '../../models/deck.ts'
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -105,6 +106,24 @@ function App() {
     )
   }
 
+  const handleStartGame = (gameId: string, username: string, deck: Deck) => {
+    const updatedPlayer = { ...currentPlayer, username }
+    setCurrentPlayer(updatedPlayer)
+    setGameId(gameId)
+    connectSocket()
+    socket.emit(
+      'startGame',
+      { gameId, currentPlayer: updatedPlayer, deck },
+      (response: Response) => {
+        response.status === 'failed'
+          ? setErrorMsg(
+              response.reason ? response.reason : 'Error starting game.',
+            )
+          : setErrorMsg('')
+      },
+    )
+  }
+
   //Todo - implement functionality
   const handleGetNewCard = () => {
     console.log('Get new card')
@@ -120,7 +139,8 @@ function App() {
         >
           {players.length !== numPlayers && (
             <Landing
-              connectToGame={handleJoinGame}
+              handleJoinGame={handleJoinGame}
+              handleStartGame={handleStartGame}
               numPlayersNeeded={numPlayers - players.length}
               errorMsg={errorMsg}
             />

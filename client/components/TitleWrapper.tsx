@@ -49,7 +49,7 @@ export default function TitleWrapper({
               className={`${started ? 'w-12 md:w-16' : 'w-[168px] md:w-[320px] lg:w-[360px]'}`}
             >
               <img
-                src="../public/images/Fish.svg"
+                src="../images/Fish.svg"
                 alt="fish logo"
                 className="h-auto w-full scale-x-[-1]"
               />
