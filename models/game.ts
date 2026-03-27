@@ -1,8 +1,8 @@
-import { Deck } from './deck'
+import { Card } from './deck'
 
 export interface Game {
   gameId: string
-  deck: Deck
+  pond: Card[]
 }
 
 export interface GameCollection {
