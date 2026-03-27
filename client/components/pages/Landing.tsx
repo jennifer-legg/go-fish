@@ -7,6 +7,7 @@ import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
 import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
 import { Deck } from '../../../models/deck.ts'
+import TitleWrapper from '../TitleWrapper.tsx'
 
 interface Props {
   handleJoinGame: (gameId: string, username: string) => void
@@ -27,13 +28,14 @@ export default function Landing({
   const [waitingForPlayer, setWaitingForPlayer] = useState(false)
   const [username, setUsername] = useState('')
   const { data: deck, isError, isLoading } = useGetShuffledDeck()
+  const [started, setStarted] = useState(false)
 
-  // const resetGame = () => {
-  //   setAccessCode('')
-  //   setJoinGame(false)
-  //   setStartAGame(false)
-  //   setStarted(false)
-  // }
+  const resetGame = () => {
+    setAccessCode('')
+    setJoinGame(false)
+    setStartAGame(false)
+    setStarted(false)
+  }
 
   const handleStartNewGame = () => {
     if (deck) {
@@ -55,7 +57,11 @@ export default function Landing({
   }
 
   return (
-    <>
+    <TitleWrapper
+      setStarted={setStarted}
+      started={started}
+      resetGame={resetGame}
+    >
       <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 lg:w-3/5 h-fit p-8 ">
         {!startAGame && !joinGame && (
           <Themedbutton onClick={() => setJoinGame(true)} color="darkBlue">
@@ -142,6 +148,6 @@ export default function Landing({
           </div>
         )}
       </ThemedContainer>
-    </>
+    </TitleWrapper>
   )
 }
