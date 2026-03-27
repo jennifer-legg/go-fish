@@ -7,13 +7,17 @@ interface Props {
   avatar: string
 }
 
-export default function Opponent({ numRivalCards, username, avatar }: Props) {
+export default function Opponent({
+  numRivalCards,
+  username = 'Opponent',
+  avatar,
+}: Props) {
   const emptyArr = Array(numRivalCards).fill('')
 
   return (
     <ThemedContainer
       color="darkBlue"
-      classname="h-full lg:rounded-[24px] lg:gap-1"
+      classname="h-fit lg:rounded-[24px] lg:gap-1 p-4"
     >
       <ThemedText secondary={true}>{username}</ThemedText>
       <div className="flex w-[95%] px-2">

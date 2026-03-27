@@ -6,6 +6,7 @@ export default interface Player {
   hand: Card[]
   sets: number
   gameId: string
+  avatar: string
 }
 
 export interface PlayerCollection {
