@@ -88,14 +88,17 @@ export default function Landing({
                 onChange={(e) => setUsername(e.target.value)}
               />
             </ThemedTextInput>
-            <Themedbutton
-              onClick={handleConnectToNewGame}
-              color="darkBlue"
-              classname="my-2"
-              isDisabled={username.trim().length < 3}
-            >
-              Start
-            </Themedbutton>
+            {!waitingForPlayer && (
+              <Themedbutton
+                onClick={handleConnectToNewGame}
+                color="darkBlue"
+                classname="my-2"
+                isDisabled={username.trim().length < 3}
+              >
+                Start
+              </Themedbutton>
+            )}
+
             {waitingForPlayer && (
               <Loading numPlayersNeeded={numPlayersNeeded} />
             )}
