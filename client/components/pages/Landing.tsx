@@ -79,30 +79,39 @@ export default function Landing({
         )}
         {startAGame && (
           <div className="flex flex-col items-center">
-            <ThemedText header={true}> ACCESS CODE </ThemedText>
+            <ThemedText> ACCESS CODE </ThemedText>
             <ThemedTextInput>
               <ThemedText>{accessCode}</ThemedText>
             </ThemedTextInput>
-            <ThemedText header={true}> Enter Username</ThemedText>
+            <ThemedText>
+              {' '}
+              {waitingForPlayer ? 'Username' : 'Enter Username'}
+            </ThemedText>
             <ThemedTextInput>
-              <input
-                value={username}
-                className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
-                type="text"
-                id="username"
-                placeholder="Enter Username..."
-                onChange={(e) => setUsername(e.target.value)}
-              />
+              {waitingForPlayer ? (
+                <ThemedText>{username}</ThemedText>
+              ) : (
+                <input
+                  value={username}
+                  className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
+                  type="text"
+                  id="username"
+                  placeholder="Enter Username..."
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+              )}
             </ThemedTextInput>
             {!waitingForPlayer && (
-              <Themedbutton
-                onClick={handleConnectToNewGame}
-                color="darkBlue"
-                classname="my-2"
-                isDisabled={username.trim().length < 3}
-              >
-                Start
-              </Themedbutton>
+              <>
+                <Themedbutton
+                  onClick={handleConnectToNewGame}
+                  color="darkBlue"
+                  classname="my-2"
+                  isDisabled={username.trim().length < 3}
+                >
+                  Start
+                </Themedbutton>
+              </>
             )}
 
             {waitingForPlayer && (
