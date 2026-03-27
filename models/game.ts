@@ -1,8 +1,10 @@
+import { Deck } from './deck'
 import Player from './player'
 
 export interface Game {
-  code: string
+  gameId: string
   players: Player[]
+  deck: Deck
 }
 
 export interface GameCollection {

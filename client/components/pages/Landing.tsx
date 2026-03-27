@@ -5,10 +5,12 @@ import ThemedText from '../themedUI/ThemedText.tsx'
 import ThemedTextInput from '../themedUI/ThemedTextInput.tsx'
 import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
+import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
+import { Deck } from '../../../models/deck.ts'
 
 interface Props {
   handleJoinGame: (gameId: string, username: string) => void
-  handleStartGame: (gameId: string, username: string) => void
+  handleStartGame: (gameId: string, username: string, deck: Deck) => void
   numPlayersNeeded: number
   errorMsg: string
 }
@@ -24,6 +26,7 @@ export default function Landing({
   const [accessCode, setAccessCode] = useState('')
   const [waitingForPlayer, setWaitingForPlayer] = useState(false)
   const [username, setUsername] = useState('')
+  const { data: deck, isError, isLoading } = useGetShuffledDeck()
 
   // const resetGame = () => {
   //   setAccessCode('')
@@ -33,14 +36,18 @@ export default function Landing({
   // }
 
   const handleStartNewGame = () => {
-    setStartAGame(true)
-    const newAccessCode = generateRandomString()
-    setAccessCode(newAccessCode)
+    if (deck) {
+      setStartAGame(true)
+      const newAccessCode = generateRandomString()
+      setAccessCode(newAccessCode)
+    }
   }
 
   const handleConnectToNewGame = () => {
-    handleStartGame(accessCode, username.trim())
-    setWaitingForPlayer(true)
+    if (deck) {
+      handleStartGame(accessCode, username.trim(), deck)
+      setWaitingForPlayer(true)
+    }
   }
 
   const handleJoinEstablishedGame = () => {
@@ -56,7 +63,11 @@ export default function Landing({
           </Themedbutton>
         )}
         {!startAGame && !joinGame && (
-          <Themedbutton onClick={handleStartNewGame} color="darkBlue">
+          <Themedbutton
+            onClick={handleStartNewGame}
+            color="darkBlue"
+            isDisabled={isLoading || isError}
+          >
             <ThemedText>Start a Game</ThemedText>
           </Themedbutton>
         )}

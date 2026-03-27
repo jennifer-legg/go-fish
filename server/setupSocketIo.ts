@@ -1,11 +1,11 @@
 import { Server } from 'socket.io'
 import Player, { PlayerCollection } from '../models/player'
 import Response, { CallbackFunction } from '../models/response'
-// import { GameCollection } from '../models/game'
+import { GameCollection } from '../models/game'
 
 //Initialise storage for connected players
 const players: PlayerCollection = {}
-// const gameStorage: GameCollection = {}
+const gameStorage: GameCollection = {}
 
 //Socket.io server commands
 export default function setupSocketIO(io: Server): void {
@@ -15,13 +15,25 @@ export default function setupSocketIO(io: Server): void {
     //When a player starts a new game
     socket.on(
       'startGame',
-      ({ gameId, currentPlayer }, callBack: CallbackFunction) => {
+      ({ gameId, currentPlayer, deck }, callBack: CallbackFunction) => {
         //1. GameId should not already be in use
         const gameIdInUse =
           Object.values(players).filter((player) => player.gameId === gameId)
             .length >= 1
         if (!gameIdInUse) {
-          login(gameId, currentPlayer, callBack)
+          login(gameId, currentPlayer)
+          //Add game to storage
+          gameStorage[gameId] = {
+            gameId,
+            players: Object.values(players).filter(
+              (player) => player.gameId === gameId,
+            ),
+            deck,
+          }
+          gameStorage[gameId].deck = deck
+          console.log(gameStorage[gameId].deck)
+          //Notify the user that the game has been joined
+          callBack({ status: 'ok' })
         } else {
           //Notify the user that the game could not be joined and disconnect
           callBack({
@@ -54,7 +66,9 @@ export default function setupSocketIO(io: Server): void {
           playersInGame.length >= 1 &&
           !usernameTaken
         ) {
-          login(gameId, currentPlayer, callBack)
+          login(gameId, currentPlayer)
+          //Notify the user that the game has been joined
+          callBack({ status: 'ok' })
         } else {
           //Notify the user that the game could not be joined and disconnect
           const reason: string = usernameTaken
@@ -72,11 +86,7 @@ export default function setupSocketIO(io: Server): void {
     )
 
     //Logging into an established or new game
-    const login = (
-      gameId: string,
-      currentPlayer: Player,
-      callBack: CallbackFunction,
-    ) => {
+    const login = (gameId: string, currentPlayer: Player) => {
       //Add player to storage
       const updatedPlayer: Player = {
         ...currentPlayer,
@@ -97,10 +107,6 @@ export default function setupSocketIO(io: Server): void {
         (player) => player.gameId === gameId,
       )
       io.to(gameId).emit('players', updatedPlayersInGame)
-
-      //Notify the user that the game has been joined
-      const response: Response = { status: 'ok' }
-      callBack(response)
     }
 
     //When a player disconnects
