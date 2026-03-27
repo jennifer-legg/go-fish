@@ -3,7 +3,7 @@ import Player, { PlayerCollection } from '../models/player'
 import Response, { CallbackFunction } from '../models/response'
 import { GameCollection } from '../models/game'
 
-//Initialise storage for connected players
+//Initialise storage for connected players and game
 const players: PlayerCollection = {}
 const gameStorage: GameCollection = {}
 
@@ -17,21 +17,13 @@ export default function setupSocketIO(io: Server): void {
       'startGame',
       ({ gameId, currentPlayer, deck }, callBack: CallbackFunction) => {
         //1. GameId should not already be in use
-        const gameIdInUse =
-          Object.values(players).filter((player) => player.gameId === gameId)
-            .length >= 1
-        if (!gameIdInUse) {
-          login(gameId, currentPlayer)
-          //Add game to storage
+        if (!gameStorage[gameId]) {
+          //Add new game to storage
           gameStorage[gameId] = {
             gameId,
-            players: Object.values(players).filter(
-              (player) => player.gameId === gameId,
-            ),
             deck,
           }
-          gameStorage[gameId].deck = deck
-          console.log(gameStorage[gameId].deck)
+          login(gameId, currentPlayer)
           //Notify the user that the game has been joined
           callBack({ status: 'ok' })
         } else {
@@ -94,7 +86,6 @@ export default function setupSocketIO(io: Server): void {
         id: socket.id,
       }
       players[socket.id] = updatedPlayer
-      console.log(players)
 
       //Join the specified game
       socket.join(gameId)
