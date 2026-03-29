@@ -3,15 +3,8 @@ import { useEffect, useState } from 'react'
 import Player from '../../models/player.ts'
 import Response from '../../models/response.ts'
 import Landing from './pages/Landing.tsx'
-import GameLayout from './GameLayout.tsx'
-import Avatar from './Avatar.tsx'
-import Chat from './Chat.tsx'
-import Dashboard from './Dashboard.tsx'
-import ScoreBoard from './ScoreBoard.tsx'
-import Opponent from './Opponent.tsx'
-import Pond from './Pond.tsx'
-import { firstHand2Players } from '../../data/deckExample'
 import { Deck } from '../../models/deck.ts'
+import GameManager from './pages/GameManager.tsx'
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -23,10 +16,11 @@ function App() {
     hand: [],
     gameId: '',
     id: '',
+    avatar: '../images/Fish.svg',
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [gameId, setGameId] = useState<string>('')
-  const [gameMessage] = useState<string>('')
+  const [gameMessage] = useState<string>('Welcome to Go Fish!')
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -119,9 +113,9 @@ function App() {
   }
 
   //Todo - implement functionality
-  const handleGetNewCard = () => {
-    console.log('Get new card')
-  }
+  // const handleGetNewCard = () => {
+  //   console.log('Get new card')
+  // }
 
   return (
     <>
@@ -135,34 +129,10 @@ function App() {
           />
         )}
         {gameId && isConnected && players.length === numPlayers && (
-          <GameLayout
-            avatarUser={<Avatar username="You" />}
-            chat={<Chat userMsg="hi" rivalMsg="hello" />}
-            dashboard={
-              <Dashboard hand={firstHand2Players} gameMessage={gameMessage} />
-            }
-            score={
-              <ScoreBoard
-                scores={[
-                  { username: 'opponent', sets: 2 },
-                  { username: 'you', sets: 1 },
-                ]}
-              />
-            }
-            opponent={
-              <Opponent
-                numRivalCards={8}
-                username="opponent"
-                avatar="../images/Fish.svg"
-              />
-            }
-            pond={
-              <Pond
-                currentCard={null}
-                buttonDisabled={true}
-                getNewCard={handleGetNewCard}
-              />
-            }
+          <GameManager
+            players={players}
+            currentPlayer={currentPlayer}
+            gameMessage={gameMessage}
           />
         )}
       </div>
