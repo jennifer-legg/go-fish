@@ -15,7 +15,7 @@ function App() {
     sets: 0,
     hand: [],
     gameId: '',
-    id: '',
+    socketId: '',
     avatar: '../images/Fish.svg',
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
@@ -34,20 +34,20 @@ function App() {
     })
 
     // Player join notification. If player joining is current player, update currentPlayer as id has been added
-    socket.on('playerJoinedGame', (player) => {
-      console.log(`${player.id} joined room`)
+    socket.on('playerJoinedGame', (player: Player) => {
+      console.log(`${player.username} joined room`)
       if (currentPlayer.username === player?.username) {
         setCurrentPlayer(player)
       }
     })
 
     // Player leave notification
-    socket.on('playerLeftGame', (player) => {
-      console.log(`${player.id} left room`)
+    socket.on('playerLeftGame', (player: Player) => {
+      console.log(`${player.username} left room`)
     })
 
     // Player list updates
-    socket.on('players', (players) => {
+    socket.on('players', (players: Player[]) => {
       console.log('set players', players)
       setPlayers(players)
     })

@@ -121,7 +121,7 @@ export default function setupSocketIO(io: Server): void {
       const updatedPlayer: Player = {
         ...currentPlayer,
         gameId,
-        id: socket.id,
+        socketId: socket.id,
       }
       playerStorage[socket.id] = updatedPlayer
       //Add joined player socketid to gamestorage
