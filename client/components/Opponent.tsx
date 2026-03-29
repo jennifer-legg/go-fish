@@ -17,10 +17,10 @@ export default function Opponent({
   return (
     <ThemedContainer
       color="darkBlue"
-      classname="h-fit lg:rounded-[24px] lg:gap-1 p-4"
+      classname="h-full lg:rounded-[24px] lg:gap-0 p-0"
     >
       <ThemedText secondary={true}>{username}</ThemedText>
-      <div className="flex w-[95%] px-2">
+      <div className="flex w-[95%] px-1">
         <div className="aspect-square h-[48px] w-auto">
           <img
             className="h-full w-full object-cover"
