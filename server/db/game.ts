@@ -27,3 +27,22 @@ export async function getGameById(gameId: string): Promise<Game | undefined> {
   }
   return undefined
 }
+
+export async function addGame({
+  pond,
+  gameId,
+}: Game): Promise<Game | undefined> {
+  const pondJson = JSON.stringify(pond)
+  const response: GameSelect[] = await connection('game')
+    .insert({ pond: pondJson, id: gameId })
+    .returning([...gameSelect])
+  if (response[0]) {
+    try {
+      const pond = JSON.parse(response[0].pond)
+      return { ...response[0], pond } as Game
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : 'error parsing json')
+    }
+  }
+  return undefined
+}

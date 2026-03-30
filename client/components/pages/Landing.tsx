@@ -5,9 +5,10 @@ import ThemedText from '../themedUI/ThemedText.tsx'
 import ThemedTextInput from '../themedUI/ThemedTextInput.tsx'
 import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
-import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
+// import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
 import { Deck } from '../../../models/deck.ts'
 import TitleWrapper from '../TitleWrapper.tsx'
+import { exampleDeck } from '../../../data/deckExample.ts'
 
 interface Props {
   handleJoinGame: (gameId: string, username: string) => void
@@ -27,7 +28,8 @@ export default function Landing({
   const [accessCode, setAccessCode] = useState('')
   const [waitingForPlayer, setWaitingForPlayer] = useState(false)
   const [username, setUsername] = useState('')
-  const { data: deck, isError, isLoading } = useGetShuffledDeck()
+  const deck = exampleDeck
+  // const { data: deck, isError, isLoading } = useGetShuffledDeck()
   const [started, setStarted] = useState(false)
 
   const resetGame = () => {
@@ -72,7 +74,7 @@ export default function Landing({
           <Themedbutton
             onClick={handleStartNewGame}
             color="darkBlue"
-            isDisabled={isLoading || isError}
+            // isDisabled={isLoading || isError}
           >
             <ThemedText>Start a Game</ThemedText>
           </Themedbutton>

@@ -58,8 +58,8 @@ export async function addNewPlayer({
   avatar,
   sets,
   gameId,
-}: Player) {
-  const response: PlayerSelect | undefined = await connection('player')
+}: Player): Promise<Player | undefined> {
+  const response: PlayerSelect[] = await connection('player')
     .insert({
       username,
       socket_id: socketId,
@@ -69,7 +69,10 @@ export async function addNewPlayer({
       game_id: gameId,
     })
     .returning([...playerSelect])
-  return convertJson(response)
+  if (response[0]) {
+    return convertJson(response[0])
+  }
+  return undefined
 }
 
 export async function editPlayer({

@@ -4,6 +4,8 @@ import Response, { CallbackFunction } from '../models/response'
 import { GameCollection } from '../models/game'
 import dealCards, { DealCardsResult } from '../client/util/dealCards'
 import { Deck } from '../models/deck'
+import * as dbPlayer from './db/player'
+import * as dbGame from './db/game'
 
 //Initialise storage for connected players and game
 const playerStorage: PlayerCollection = {}
@@ -41,7 +43,8 @@ export default function setupSocketIO(io: Server): void {
             pond: deck.cards,
             playersSocketId: [],
           }
-          //Add player to storage and join room
+          //Add game to database
+          addGameToDatabase(gameId, deck)
           addPlayerToGame(gameId, currentPlayer)
           //Notify all players that the game has been joined
           notifyPlayerDetails(gameId, playerStorage[socket.id])
@@ -116,8 +119,8 @@ export default function setupSocketIO(io: Server): void {
     )
 
     //Logging into an established or new game
-    const addPlayerToGame = (gameId: string, currentPlayer: Player) => {
-      //Add player to storage
+    const addPlayerToGame = async (gameId: string, currentPlayer: Player) => {
+      //Add player to global storage
       const updatedPlayer: Player = {
         ...currentPlayer,
         gameId,
@@ -128,6 +131,9 @@ export default function setupSocketIO(io: Server): void {
       gameStorage[gameId].playersSocketId.push(socket.id)
       //Join the specified game
       socket.join(gameId)
+      //Add player to database
+      console.log(updatedPlayer, 'one')
+      addPlayerToDatabase(updatedPlayer)
     }
 
     const notifyPlayerDetails = (gameId: string, updatedPlayer: Player) => {
@@ -157,4 +163,24 @@ export default function setupSocketIO(io: Server): void {
       }
     })
   })
+}
+
+const addGameToDatabase = async (gameId: string, deck: Deck) => {
+  try {
+    const gameSaved = await dbGame.addGame({
+      pond: deck.cards,
+      gameId,
+      playersSocketId: [],
+    })
+  } catch (err) {
+    console.log(err instanceof Error ? err.message : 'failed')
+  }
+}
+
+const addPlayerToDatabase = async (player: Player) => {
+  try {
+    const playerSaved = await dbPlayer.addNewPlayer(player)
+  } catch (err) {
+    console.log(err instanceof Error ? err.message : 'failed')
+  }
 }
