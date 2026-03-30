@@ -4,7 +4,6 @@ import Player from './player'
 export interface Game {
   gameId: string
   pond: Card[]
-  playersSocketId: string[]
 }
 
 export interface GameWithPlayers extends Game {

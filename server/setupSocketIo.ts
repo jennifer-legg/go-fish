@@ -1,9 +1,9 @@
 import { Server } from 'socket.io'
 import Player, { PlayerCollection } from '../models/player'
 import Response, { CallbackFunction } from '../models/response'
-import { GameCollection } from '../models/game'
 import dealCards, { DealCardsResult } from '../client/util/dealCards'
 import { Deck } from '../models/deck'
+import { Game, GameWithPlayers, GameCollection } from '../models/game'
 import * as dbPlayer from './db/player'
 import * as dbGame from './db/game'
 
@@ -41,7 +41,6 @@ export default function setupSocketIO(io: Server): void {
           gameStorage[gameId] = {
             gameId,
             pond: deck.cards,
-            playersSocketId: [],
           }
           //Add game to database
           addGameToDatabase(gameId, deck)
@@ -91,29 +90,25 @@ export default function setupSocketIO(io: Server): void {
               2,
               gameStorage[gameId].pond,
             )
-            //Add pond and hands to player/game storage
-            gameStorage[gameId].pond = pond
-            gameStorage[gameId].playersSocketId.forEach((id, i) => {
-              if (playerStorage[id].hand) {
-                playerStorage[id].hand = hands[i]
-              }
-            })
+            //Add pond to game storage in database
+            updatePond({ gameId, pond })
+            //Add hands to player storage
+            //Notify all players that the game has been joined
+            notifyPlayerDetails(gameId, playerStorage[socket.id])
+            callBack({ status: 'ok' })
+          } else {
+            //Notify the user that the game could not be joined and disconnect
+            const reason: string = usernameTaken
+              ? 'Unable to join game, username already in use.'
+              : playersInGame.length < 1
+                ? 'Invalid access code'
+                : playersInGame.length >= maxPlayers
+                  ? 'Unable to join game, max players reached'
+                  : 'Error joining game'
+            const response: Response = { status: 'failed', reason }
+            callBack(response)
+            socket.disconnect()
           }
-          //Notify all players that the game has been joined
-          notifyPlayerDetails(gameId, playerStorage[socket.id])
-          callBack({ status: 'ok' })
-        } else {
-          //Notify the user that the game could not be joined and disconnect
-          const reason: string = usernameTaken
-            ? 'Unable to join game, username already in use.'
-            : playersInGame.length < 1
-              ? 'Invalid access code'
-              : playersInGame.length >= maxPlayers
-                ? 'Unable to join game, max players reached'
-                : 'Error joining game'
-          const response: Response = { status: 'failed', reason }
-          callBack(response)
-          socket.disconnect()
         }
       },
     )
@@ -165,13 +160,17 @@ export default function setupSocketIO(io: Server): void {
   })
 }
 
-const addGameToDatabase = async (gameId: string, deck: Deck) => {
+const addGameToDatabase = async (
+  gameId: string,
+  deck: Deck,
+  callback: (game: Game | undefined) => void,
+) => {
   try {
     const gameSaved = await dbGame.addGame({
       pond: deck.cards,
       gameId,
-      playersSocketId: [],
     })
+    callback(gameSaved)
   } catch (err) {
     console.log(err instanceof Error ? err.message : 'failed')
   }
@@ -180,6 +179,24 @@ const addGameToDatabase = async (gameId: string, deck: Deck) => {
 const addPlayerToDatabase = async (player: Player) => {
   try {
     const playerSaved = await dbPlayer.addNewPlayer(player)
+  } catch (err) {
+    console.log(err instanceof Error ? err.message : 'failed')
+  }
+}
+
+const editPlayerInDatabase = async (player: Player) => {
+  try {
+    const playerEdited = await dbPlayer.editPlayer(player)
+    console.log(playerEdited)
+  } catch (err) {
+    console.log(err instanceof Error ? err.message : 'failed')
+  }
+}
+
+const updatePond = async (game: Game) => {
+  try {
+    const gameEdited = await dbGame.editPondInGame(game)
+    console.log(gameEdited)
   } catch (err) {
     console.log(err instanceof Error ? err.message : 'failed')
   }

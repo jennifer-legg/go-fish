@@ -46,3 +46,23 @@ export async function addGame({
   }
   return undefined
 }
+
+export async function editPondInGame({
+  pond,
+  gameId,
+}: Game): Promise<Game | undefined> {
+  const pondJson = JSON.stringify(pond)
+  const response: GameSelect[] = await connection('game')
+    .where({ id: gameId })
+    .update({ pond: pondJson })
+    .returning([...gameSelect])
+  if (response[0]) {
+    try {
+      const pond = JSON.parse(response[0].pond)
+      return { ...response[0], pond } as Game
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : 'error parsing json')
+    }
+  }
+  return undefined
+}

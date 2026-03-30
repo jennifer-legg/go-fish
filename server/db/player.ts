@@ -83,7 +83,7 @@ export async function editPlayer({
   sets,
   gameId,
 }: Player) {
-  const response: PlayerSelect | undefined = await connection('saved_games')
+  const response: PlayerSelect[] = await connection('saved_games')
     .where({ username })
     .update({
       hand: JSON.stringify(hand),
@@ -93,7 +93,10 @@ export async function editPlayer({
       socket_id: socketId,
     })
     .returning([...playerSelect])
-  return convertJson(response)
+  if (response[0]) {
+    return convertJson(response[0])
+  }
+  return undefined
 }
 
 function convertJson(playerData: PlayerSelect | undefined): Player | undefined {
