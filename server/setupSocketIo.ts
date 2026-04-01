@@ -72,73 +72,72 @@ export default function setupSocketIO(io: Server): void {
       callBack: CallbackFunction,
     ) => {
       //-- TODO -- http query to check if username is in use in real time
-      //Get game/player data from database, checking the following criteria:
-      //1. Username should not be in use within the established game.
-      //2. Game should have less than the specified number of players.
-      //3. GameId should already be in use and have at least one player
-      //4. Is game at max number of players once this player has been added?
       try {
+        //Get game/player data from database, checking the following criteria:
+        //1. Game should already be in database
+        //2. Game should have at least one player
+        //3. Game should have less than the max number of players
+        //4. Username should not be in use within the established game.
         const allPlayers = await dbPlayer.getAllPlayersInGame(gameId)
         const game = await dbGame.getGameById(gameId)
-        if (allPlayers) {
-          const playersWithUsername = allPlayers.filter(
+        if (
+          game &&
+          allPlayers.length != 0 &&
+          allPlayers.length < maxPlayers &&
+          allPlayers.filter(
             (player) => player.username === currentPlayer.username,
-          )
-          const gameWasAtLessThanMaxPlayers = allPlayers.length < maxPlayers
-          const gameNowAtMaxPlayers = allPlayers.length + 1 === maxPlayers
-          if (
-            playersWithUsername.length === 0 &&
-            gameWasAtLessThanMaxPlayers &&
-            game
-          ) {
-            if (gameNowAtMaxPlayers) {
-              //Deal cards to players if game at max number of players
-              const { hands, pond } = dealCards(maxPlayers, game.pond)
-              //Add hands and players to database
-              const updatedOpponent = await dbPlayer.editPlayer({
-                ...allPlayers[0],
-                hand: hands[1],
-              })
-              const updatedPlayer = await dbPlayer.addNewPlayer({
-                ...currentPlayer,
-                hand: hands[0],
-                socketId: socket.id,
-                gameId,
-              })
-              //Add pond to game storage in database
-              const updatedGame = await dbGame.editPondInGame({
-                pond,
-                gameId,
-              })
+          ).length === 0
+        ) {
+          //If game will be at max players with addition of this joining player,
+          //deal cards from game pond to each player and add remaining cards to game pond
+          if (allPlayers.length + 1 === maxPlayers) {
+            //Deal cards from game pond
+            const { hands, pond } = dealCards(maxPlayers, game.pond)
+            //Add hands and players to database
+            const updatedOpponent = await dbPlayer.editPlayer({
+              ...allPlayers[0],
+              hand: hands[1],
+            })
+            const updatedPlayer = await dbPlayer.addNewPlayer({
+              ...currentPlayer,
+              hand: hands[0],
+              socketId: socket.id,
+              gameId,
+            })
+            //Update pond in database
+            const updatedGame = await dbGame.editPondInGame({
+              pond,
+              gameId,
+            })
+            if (updatedPlayer && updatedOpponent && updatedGame) {
+              //Join socket room and update client for all players with game/player details
               socket.join(gameId)
-              if (updatedPlayer && updatedOpponent && updatedGame) {
-                notifyPlayerDetails(gameId, updatedPlayer, [
-                  updatedOpponent,
-                  updatedPlayer,
-                ])
-                notifyGameUpdate(updatedGame)
-              }
-            } else {
-              //Add currentplayer to database
-              const updatedPlayer = await dbPlayer.addNewPlayer({
-                ...currentPlayer,
-                socketId: socket.id,
-              })
-              //Notify all players that the game has been joined
-              if (updatedPlayer) {
-                socket.join(gameId)
-                notifyPlayerDetails(gameId, updatedPlayer, [
-                  ...allPlayers,
-                  updatedPlayer,
-                ])
-                notifyGameUpdate(game)
-              }
+              notifyPlayerDetails(gameId, updatedPlayer, [
+                updatedOpponent,
+                updatedPlayer,
+              ])
+              notifyGameUpdate(updatedGame)
             }
-            callBack({ status: 'ok' })
+          } else {
+            //Add currentplayer to database
+            const updatedPlayer = await dbPlayer.addNewPlayer({
+              ...currentPlayer,
+              socketId: socket.id,
+            })
+            //Notify all players that the game has been joined
+            if (updatedPlayer) {
+              socket.join(gameId)
+              notifyPlayerDetails(gameId, updatedPlayer, [
+                ...allPlayers,
+                updatedPlayer,
+              ])
+              notifyGameUpdate(game)
+            }
           }
+          callBack({ status: 'ok' })
         }
       } catch (err) {
-        console.log(err instanceof Error ? err.message : 'join game failed')
+        console.log(err instanceof Error ? err.message : 'Join game failed')
         callBack({
           status: 'failed',
           reason: 'Server error',
