@@ -1,15 +1,11 @@
 import { Server } from 'socket.io'
-import Player, { PlayerCollection } from '../models/player'
+import Player from '../models/player'
 import Response, { CallbackFunction } from '../models/response'
 import dealCards, { DealCardsResult } from '../client/util/dealCards'
 import { Deck } from '../models/deck'
-import { Game, GameWithPlayers, GameCollection } from '../models/game'
+import { Game } from '../models/game'
 import * as dbPlayer from './db/player'
 import * as dbGame from './db/game'
-
-//Initialise storage for connected players and game
-const playerStorage: PlayerCollection = {}
-const gameStorage: GameCollection = {}
 
 interface StartGameArg {
   gameId: string
@@ -35,28 +31,25 @@ export default function setupSocketIO(io: Server): void {
         { gameId, currentPlayer, deck }: StartGameArg,
         callBack: CallbackFunction,
       ) => {
-        //1. GameId should not already be in use
-        if (!gameStorage[gameId]) {
-          //Add new game to storage
-          gameStorage[gameId] = {
-            gameId,
-            pond: deck.cards,
-          }
+        //1. TODO: GameId should not already be in use
           //Add game to database
-          addGameToDatabase(gameId, deck)
-          addPlayerToGame(gameId, currentPlayer)
-          //Notify all players that the game has been joined
-          notifyPlayerDetails(gameId, playerStorage[socket.id])
-          callBack({ status: 'ok' })
-        } else {
-          //Notify the user that the game could not be joined and disconnect
-          callBack({
-            status: 'failed',
-            reason: 'Invalid access code',
-          })
-          socket.disconnect()
+          addGameToDatabase(deck, (game: Game | undefined) => {
+            if (game) {
+              notifyGameUpdate(game)
+            } else {
+              //Notify the user that the game could not be joined and disconnect
+              callBack({
+                status: 'failed',
+                reason: 'Invalid access code',
+              })
+              socket.disconnect()
         }
-      },
+          })
+          // addPlayerToGame(gameId, currentPlayer)
+          // //Notify all players that the game has been joined
+          // notifyPlayerDetails(gameId)
+          // callBack({ status: 'ok' })
+        } 
     )
 
     //When a player joins an established game
@@ -69,18 +62,8 @@ export default function setupSocketIO(io: Server): void {
         //1. Username should not be in use within the established game
         //2. Game should have less than the specified number of players
         //3. GameId should already be in use
-        const playersInGame = Object.values(playerStorage).filter(
-          (player) => player.gameId === gameId,
-        )
-        const usernameTaken =
-          playersInGame.filter(
-            (player) => player.username === currentPlayer.username,
-          ).length >= 1
-        //Check if room has less than max players and if username is taken
         if (
-          playersInGame.length < maxPlayers &&
-          playersInGame.length >= 1 &&
-          !usernameTaken
+          //criteria above
         ) {
           //Add player to storage and join room
           addPlayerToGame(gameId, currentPlayer)
@@ -131,14 +114,20 @@ export default function setupSocketIO(io: Server): void {
       addPlayerToDatabase(updatedPlayer)
     }
 
-    const notifyPlayerDetails = (gameId: string, updatedPlayer: Player) => {
-      //Notify other players in the game about the new player
-      io.to(gameId).emit('playerJoinedGame', updatedPlayer)
+    const notifyPlayerDetails = (
+      gameId: string,
+      updatedPlayer: Player,
+      playerArr: Player[],
+    ) => {
+      //Update current player
+      io.to(socket.id).emit('updateCurrentPlayer', updatedPlayer)
       //Send updated player list to all users in the room
-      const updatedPlayersInGame: Player[] = Object.values(
-        playerStorage,
-      ).filter((player) => player.gameId === gameId)
-      io.to(gameId).emit('players', updatedPlayersInGame)
+      io.to(gameId).emit('players', playerArr)
+    }
+
+    const notifyGameUpdate = (game: Game) => {
+      //Send updated pond to all users/players in the game room
+      io.to(game.gameId).emit('gameUpdated', game.pond)
     }
 
     //When a player disconnects
@@ -161,15 +150,11 @@ export default function setupSocketIO(io: Server): void {
 }
 
 const addGameToDatabase = async (
-  gameId: string,
   deck: Deck,
   callback: (game: Game | undefined) => void,
 ) => {
   try {
-    const gameSaved = await dbGame.addGame({
-      pond: deck.cards,
-      gameId,
-    })
+    const gameSaved = await dbGame.addNewGame(deck.cards)
     callback(gameSaved)
   } catch (err) {
     console.log(err instanceof Error ? err.message : 'failed')

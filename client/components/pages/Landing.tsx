@@ -3,7 +3,6 @@ import Themedbutton from '../themedUI/ThemedButton.tsx'
 import ThemedContainer from '../themedUI/ThemedContainer.tsx'
 import ThemedText from '../themedUI/ThemedText.tsx'
 import ThemedTextInput from '../themedUI/ThemedTextInput.tsx'
-import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
 // import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
 import { Deck } from '../../../models/deck.ts'
@@ -12,9 +11,10 @@ import { exampleDeck } from '../../../data/deckExample.ts'
 
 interface Props {
   handleJoinGame: (gameId: string, username: string) => void
-  handleStartGame: (gameId: string, username: string, deck: Deck) => void
+  handleStartGame: (username: string, deck: Deck) => void
   numPlayersNeeded: number
   errorMsg: string
+  accessCode: string
 }
 
 export default function Landing({
@@ -22,10 +22,11 @@ export default function Landing({
   handleStartGame,
   numPlayersNeeded,
   errorMsg,
+  accessCode,
 }: Props) {
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
-  const [accessCode, setAccessCode] = useState('')
+  const [accessCodeInput, setAccessCodeInput] = useState('')
   const [waitingForPlayer, setWaitingForPlayer] = useState(false)
   const [username, setUsername] = useState('')
   const deck = exampleDeck
@@ -33,7 +34,7 @@ export default function Landing({
   const [started, setStarted] = useState(false)
 
   const resetGame = () => {
-    setAccessCode('')
+    setAccessCodeInput('')
     setJoinGame(false)
     setStartAGame(false)
     setStarted(false)
@@ -42,20 +43,18 @@ export default function Landing({
   const handleStartNewGame = () => {
     if (deck) {
       setStartAGame(true)
-      const newAccessCode = generateRandomString()
-      setAccessCode(newAccessCode)
     }
   }
 
   const handleConnectToNewGame = () => {
     if (deck) {
-      handleStartGame(accessCode, username.trim(), deck)
+      handleStartGame(username.trim(), deck)
       setWaitingForPlayer(true)
     }
   }
 
   const handleJoinEstablishedGame = () => {
-    handleJoinGame(accessCode, username.trim())
+    handleJoinGame(accessCodeInput, username.trim())
   }
 
   return (
@@ -131,7 +130,7 @@ export default function Landing({
                 type="text"
                 id="accessCode"
                 placeholder="Enter Access Code..."
-                onChange={(e) => setAccessCode(e.target.value)}
+                onChange={(e) => setAccessCodeInput(e.target.value)}
               />
             </ThemedTextInput>
             <ThemedText> Enter Username</ThemedText>

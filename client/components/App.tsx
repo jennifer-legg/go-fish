@@ -5,6 +5,12 @@ import Response from '../../models/response.ts'
 import Landing from './pages/Landing.tsx'
 import { Deck } from '../../models/deck.ts'
 import GameManager from './pages/GameManager.tsx'
+import { Game } from '../../models/game.ts'
+
+const emptyGame: Game = {
+  pond: [],
+  gameId: '',
+}
 
 function App() {
   const [isConnected, setIsConnected] = useState<boolean>(false)
@@ -19,7 +25,7 @@ function App() {
     avatar: '../images/Fish.svg',
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
-  const [gameId, setGameId] = useState<string>('')
+  const [game, setGame] = useState<Game>(emptyGame)
   const [gameMessage] = useState<string>('Welcome to Go Fish!')
 
   useEffect(() => {
@@ -33,17 +39,19 @@ function App() {
       setIsConnected(false)
     })
 
-    // Player join notification. If player joining is current player, update currentPlayer as id has been added
-    socket.on('playerJoinedGame', (player: Player) => {
-      console.log(`${player.username} joined room`)
-      if (currentPlayer.username === player?.username) {
-        setCurrentPlayer(player)
-      }
+    // Update current player.
+    socket.on('updateCurrentPlayer', (player: Player) => {
+      setCurrentPlayer(player)
     })
 
     // Player leave notification
     socket.on('playerLeftGame', (player: Player) => {
       console.log(`${player.username} left room`)
+    })
+
+    //Update game info
+    socket.on('updateGameDetails', (game: Game) => {
+      setGame(game)
     })
 
     // Player list updates
@@ -55,9 +63,10 @@ function App() {
     return () => {
       socket.off('connect')
       socket.off('disconnect')
-      socket.off('playerJoined')
+      socket.off('updateCurrentPlayer')
       socket.off('playerLeft')
       socket.off('players')
+      socket.off('updateGameDetails')
       disconnectSocket()
     }
   }, [currentPlayer.username])
@@ -79,7 +88,7 @@ function App() {
   const handleJoinGame = (gameId: string, username: string) => {
     const updatedPlayer = { ...currentPlayer, username }
     setCurrentPlayer(updatedPlayer)
-    setGameId(gameId)
+    setGame({ ...game, gameId })
     connectSocket()
     socket.emit(
       'joinGame',
@@ -94,14 +103,13 @@ function App() {
     )
   }
 
-  const handleStartGame = (gameId: string, username: string, deck: Deck) => {
+  const handleStartGame = (username: string, deck: Deck) => {
     const updatedPlayer = { ...currentPlayer, username }
     setCurrentPlayer(updatedPlayer)
-    setGameId(gameId)
     connectSocket()
     socket.emit(
       'startGame',
-      { gameId, currentPlayer: updatedPlayer, deck },
+      { currentPlayer: updatedPlayer, deck },
       (response: Response) => {
         response.status === 'failed'
           ? setErrorMsg(
@@ -126,9 +134,10 @@ function App() {
             handleStartGame={handleStartGame}
             numPlayersNeeded={numPlayers - players.length}
             errorMsg={errorMsg}
+            accessCode={game.gameId}
           />
         )}
-        {gameId && isConnected && players.length === numPlayers && (
+        {game.gameId && isConnected && players.length === numPlayers && (
           <GameManager
             players={players}
             currentPlayer={currentPlayer}

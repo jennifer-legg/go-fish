@@ -1,6 +1,7 @@
 import connection from './connection'
 import { Game } from '../../models/game'
 import { Card } from '../../models/deck'
+import generateRandomString from '../../client/util/generateRandomString'
 
 const gameSelect = ['id as gameId', 'pond']
 
@@ -28,13 +29,12 @@ export async function getGameById(gameId: string): Promise<Game | undefined> {
   return undefined
 }
 
-export async function addGame({
-  pond,
-  gameId,
-}: Game): Promise<Game | undefined> {
+export async function addNewGame(pond: Card[]): Promise<Game | undefined> {
+  //Todo - make sure string is unique
+  const string = generateRandomString()
   const pondJson = JSON.stringify(pond)
   const response: GameSelect[] = await connection('game')
-    .insert({ pond: pondJson, id: gameId })
+    .insert({ pond: pondJson, id: string })
     .returning([...gameSelect])
   if (response[0]) {
     try {
