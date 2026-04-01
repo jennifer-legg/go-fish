@@ -1,7 +1,7 @@
 export function up(knex) {
   return knex.schema.createTable('player', (table) => {
     table.string('game_id').references('game.id')
-    table.string('username').primary().unique()
+    table.string('username')
     table.json('hand')
     table.string('avatar')
     table.integer('sets')

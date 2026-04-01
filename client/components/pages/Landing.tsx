@@ -80,10 +80,14 @@ export default function Landing({
         )}
         {startAGame && (
           <div className="flex flex-col items-center">
-            <ThemedText> ACCESS CODE </ThemedText>
-            <ThemedTextInput>
-              <ThemedText>{accessCode}</ThemedText>
-            </ThemedTextInput>
+            {waitingForPlayer && (
+              <>
+                <ThemedText> ACCESS CODE </ThemedText>
+                <ThemedTextInput>
+                  <ThemedText>{accessCode}</ThemedText>
+                </ThemedTextInput>
+              </>
+            )}
             <ThemedText>
               {' '}
               {waitingForPlayer ? 'Username' : 'Enter Username'}
@@ -125,10 +129,10 @@ export default function Landing({
             <ThemedText> Enter Access Code</ThemedText>
             <ThemedTextInput>
               <input
-                value={accessCode}
+                value={accessCodeInput}
                 className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
                 type="text"
-                id="accessCode"
+                id="accessCodeInput"
                 placeholder="Enter Access Code..."
                 onChange={(e) => setAccessCodeInput(e.target.value)}
               />

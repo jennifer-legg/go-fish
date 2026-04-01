@@ -1,11 +1,11 @@
 import { Server } from 'socket.io'
 import Player from '../models/player'
 import { CallbackFunction } from '../models/response'
-// import dealCards, { DealCardsResult } from '../client/util/dealCards'
 import { Deck } from '../models/deck'
 import { Game } from '../models/game'
 import * as dbPlayer from './db/player'
 import * as dbGame from './db/game'
+import dealCards from '../client/util/dealCards'
 
 interface StartGameArg {
   currentPlayer: Player
@@ -43,19 +43,13 @@ export default function setupSocketIO(io: Server): void {
       },
     )
 
-    //Logging into an established or new game
-    // const addPlayerToGame = async (gameId: string, currentPlayer: Player) => {
-    //   //Add player to global storage
-    //   const updatedPlayer: Player = {
-    //     ...currentPlayer,
-    //     gameId,
-    //     socketId: socket.id,
-    //   }
-    //   //Add player to database
-    //   const player = await addPlayerToDatabase(updatedPlayer)
-    //   //Join the specified game
-    //   socket.join(gameId)
-    // }
+    //When a player disconnects
+    socket.on('disconnect', () => {
+      console.log(`user ${socket.id} disconnected`)
+      //Send update about player having left to remaining players in game (socket room)
+      //Update players list for front-end
+      //io.to(player.gameId).emit('playerLeftGame', remainingPlayersInGame)
+    })
 
     const notifyPlayerDetails = (
       gameId: string,
@@ -69,18 +63,9 @@ export default function setupSocketIO(io: Server): void {
     }
 
     const notifyGameUpdate = (game: Game) => {
-      //Send updated pond to all users/players in the game room
-      io.to(game.gameId).emit('gameUpdated', game.pond)
+      //Send updated game to all users/players in the game room
+      io.to(game.gameId).emit('updateGameDetails', game)
     }
-
-    //When a player disconnects
-    socket.on('disconnect', () => {
-      console.log(`user ${socket.id} disconnected`)
-      //Send update about player having left to remaining players in game (socket room)
-      //Remove player from storage
-      //Update players list for front-end
-      //io.to(player.gameId).emit('playerLeftGame', remainingPlayersInGame)
-    })
 
     const joinGame = async (
       { gameId, currentPlayer, maxPlayers }: JoinGameArg,
@@ -88,18 +73,70 @@ export default function setupSocketIO(io: Server): void {
     ) => {
       //-- TODO -- http query to check if username is in use in real time
       //Get game/player data from database, checking the following criteria:
-      //1. Username should not be in use within the established game
-      //2. Game should have less than the specified number of players
+      //1. Username should not be in use within the established game.
+      //2. Game should have less than the specified number of players.
       //3. GameId should already be in use and have at least one player
+      //4. Is game at max number of players once this player has been added?
       try {
-        //Deal cards to players if game at max number of players
-        //Add hands and player to database
-        //If username is not in use, add player to storage and join room
-        //Add pond to game storage in database
-        //Notify all players that the game has been joined
-        socket.join(gameId)
-        notifyPlayerDetails(gameId, updatedPlayer, playerList)
-        callBack({ status: 'ok' })
+        const allPlayers = await dbPlayer.getAllPlayersInGame(gameId)
+        const game = await dbGame.getGameById(gameId)
+        if (allPlayers) {
+          const playersWithUsername = allPlayers.filter(
+            (player) => player.username === currentPlayer.username,
+          )
+          const gameWasAtLessThanMaxPlayers = allPlayers.length < maxPlayers
+          const gameNowAtMaxPlayers = allPlayers.length + 1 === maxPlayers
+          if (
+            playersWithUsername.length === 0 &&
+            gameWasAtLessThanMaxPlayers &&
+            game
+          ) {
+            if (gameNowAtMaxPlayers) {
+              //Deal cards to players if game at max number of players
+              const { hands, pond } = dealCards(maxPlayers, game.pond)
+              //Add hands and players to database
+              const updatedOpponent = await dbPlayer.editPlayer({
+                ...allPlayers[0],
+                hand: hands[1],
+              })
+              const updatedPlayer = await dbPlayer.addNewPlayer({
+                ...currentPlayer,
+                hand: hands[0],
+                socketId: socket.id,
+                gameId,
+              })
+              //Add pond to game storage in database
+              const updatedGame = await dbGame.editPondInGame({
+                pond,
+                gameId,
+              })
+              socket.join(gameId)
+              if (updatedPlayer && updatedOpponent && updatedGame) {
+                notifyPlayerDetails(gameId, updatedPlayer, [
+                  updatedOpponent,
+                  updatedPlayer,
+                ])
+                notifyGameUpdate(updatedGame)
+              }
+            } else {
+              //Add currentplayer to database
+              const updatedPlayer = await dbPlayer.addNewPlayer({
+                ...currentPlayer,
+                socketId: socket.id,
+              })
+              //Notify all players that the game has been joined
+              if (updatedPlayer) {
+                socket.join(gameId)
+                notifyPlayerDetails(gameId, updatedPlayer, [
+                  ...allPlayers,
+                  updatedPlayer,
+                ])
+                notifyGameUpdate(game)
+              }
+            }
+            callBack({ status: 'ok' })
+          }
+        }
       } catch (err) {
         console.log(err instanceof Error ? err.message : 'join game failed')
         callBack({

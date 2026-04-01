@@ -41,6 +41,7 @@ function App() {
 
     // Update current player.
     socket.on('updateCurrentPlayer', (player: Player) => {
+      console.log('updateCurrentPlayer', player)
       setCurrentPlayer(player)
     })
 
@@ -51,6 +52,7 @@ function App() {
 
     //Update game info
     socket.on('updateGameDetails', (game: Game) => {
+      console.log('set game', game)
       setGame(game)
     })
 

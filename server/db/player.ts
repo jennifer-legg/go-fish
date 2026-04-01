@@ -83,7 +83,7 @@ export async function editPlayer({
   sets,
   gameId,
 }: Player) {
-  const response: PlayerSelect[] = await connection('saved_games')
+  const response: PlayerSelect[] = await connection('player')
     .where({ username })
     .update({
       hand: JSON.stringify(hand),
