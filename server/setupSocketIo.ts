@@ -117,6 +117,12 @@ export default function setupSocketIO(io: Server): void {
                 updatedPlayer,
               ])
               notifyGameUpdate(updatedGame)
+            } else {
+              callBack({
+                status: 'failed',
+                reason: 'Server error',
+              })
+              socket.disconnect()
             }
           } else {
             //Add currentplayer to database
@@ -135,6 +141,18 @@ export default function setupSocketIO(io: Server): void {
             }
           }
           callBack({ status: 'ok' })
+        } else {
+          const reason: string =
+            !game || allPlayers.length != 0
+              ? 'Game does not exist'
+              : allPlayers.length < maxPlayers
+                ? 'Game already has the maximum number of players'
+                : 'Username is already in use. Choose a new username'
+          callBack({
+            status: 'failed',
+            reason,
+          })
+          socket.disconnect()
         }
       } catch (err) {
         console.log(err instanceof Error ? err.message : 'Join game failed')
