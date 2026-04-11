@@ -53,6 +53,11 @@ export default function GameManager({
               (player) => player.username != currentPlayer.username,
             )[0]?.avatar
           }
+          isActive={
+            players.filter(
+              (player) => player.username != currentPlayer.username,
+            )[0]?.isActive
+          }
         />
       }
       pond={

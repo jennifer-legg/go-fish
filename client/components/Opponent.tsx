@@ -5,9 +5,11 @@ interface Props {
   numRivalCards: number
   username: string
   avatar: string
+  isActive: boolean
 }
 
 export default function Opponent({
+  isActive,
   numRivalCards,
   username = 'Opponent',
   avatar,
@@ -17,16 +19,26 @@ export default function Opponent({
   return (
     <ThemedContainer
       color="darkBlue"
-      classname="h-full lg:rounded-[24px] lg:gap-0 p-0"
+      classname={`h-full lg:rounded-[24px] lg:gap-0 p-0 ${!isActive ? 'grayscale' : null}`}
     >
-      <ThemedText secondary={true}>{username}</ThemedText>
+      <ThemedText secondary={true}>
+        {username} {!isActive ? '- Disconnected' : null}
+      </ThemedText>
       <div className="flex w-[95%] px-1">
         <div className="aspect-square h-[48px] w-auto">
-          <img
-            className="h-full w-full object-cover"
-            src={avatar}
-            alt="Your avatar"
-          />
+          {isActive ? (
+            <img
+              className="h-full w-full object-cover"
+              src={avatar}
+              alt="Your avatar"
+            />
+          ) : (
+            <img
+              className="h-full w-full object-cover"
+              src="../images/offline-avatar.svg"
+              alt="Offline avatar"
+            />
+          )}
         </div>
         <div
           id="card-container"
