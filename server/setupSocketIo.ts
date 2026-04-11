@@ -46,10 +46,31 @@ export default function setupSocketIO(io: Server): void {
     //When a player disconnects
     socket.on('disconnect', () => {
       console.log(`user ${socket.id} disconnected`)
-      //Send update about player having left to remaining players in game (socket room)
-      //Update players list for front-end
-      //io.to(player.gameId).emit('playerLeftGame', remainingPlayersInGame)
+      disconnect()
     })
+
+    const disconnect = async () => {
+      try {
+        //Change player's status in database
+        const disconnectedPlayer = await dbPlayer.changeActiveStatus(
+          false,
+          socket.id,
+        )
+        //Notify remaining players that player has disconnected
+        if (disconnectedPlayer) {
+          io.to(disconnectedPlayer.gameId).emit(
+            'playerInactive',
+            disconnectedPlayer,
+          )
+        }
+      } catch (err) {
+        console.log(
+          err instanceof Error
+            ? err.message
+            : 'Change status to inactive failed',
+        )
+      }
+    }
 
     const notifyPlayerDetails = (
       gameId: string,
@@ -103,6 +124,7 @@ export default function setupSocketIO(io: Server): void {
               hand: hands[0],
               socketId: socket.id,
               gameId,
+              isActive: true,
             })
             //Update pond in database
             const updatedGame = await dbGame.editPondInGame({
@@ -177,6 +199,7 @@ export default function setupSocketIO(io: Server): void {
             ...currentPlayer,
             gameId: newGame.gameId,
             socketId: socket.id,
+            isActive: true,
           })
           if (newPlayer) {
             //Join socket.io room, gameId is the room name

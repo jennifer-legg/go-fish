@@ -6,6 +6,7 @@ export function up(knex) {
     table.string('avatar')
     table.integer('sets')
     table.string('socket_id')
+    table.boolean('active')
   })
 }
 

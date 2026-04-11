@@ -8,6 +8,7 @@ type PlayerSelect = {
   sets: number
   gameId: string
   avatar: string
+  isActive: boolean
 }
 
 const playerSelect = [
@@ -17,6 +18,7 @@ const playerSelect = [
   'avatar',
   'sets',
   'socket_id as socketId',
+  'active as isActive',
 ]
 
 //Returns true if username is valid
@@ -35,6 +37,17 @@ export async function getPlayerByUsername(
     .select(...playerSelect)
     .first()
   return convertJson(response)
+}
+
+export async function changeActiveStatus(
+  isActive: boolean,
+  socketId: string,
+): Promise<Player | undefined> {
+  const response = await connection('player')
+    .where({ socket_id: socketId })
+    .update({ active: isActive })
+    .returning([...playerSelect])
+  return convertJson(response[0])
 }
 
 export async function getAllPlayersInGame(gameId: string): Promise<Player[]> {
@@ -58,6 +71,7 @@ export async function addNewPlayer({
   avatar,
   sets,
   gameId,
+  isActive,
 }: Player): Promise<Player | undefined> {
   const response: PlayerSelect[] = await connection('player')
     .insert({
@@ -67,6 +81,7 @@ export async function addNewPlayer({
       avatar,
       sets,
       game_id: gameId,
+      active: isActive,
     })
     .returning([...playerSelect])
   if (response[0]) {
@@ -82,6 +97,7 @@ export async function editPlayer({
   avatar,
   sets,
   gameId,
+  isActive,
 }: Player) {
   const response: PlayerSelect[] = await connection('player')
     .where({ username })
@@ -91,6 +107,7 @@ export async function editPlayer({
       sets,
       game_id: gameId,
       socket_id: socketId,
+      active: isActive,
     })
     .returning([...playerSelect])
   if (response[0]) {
@@ -103,9 +120,11 @@ function convertJson(playerData: PlayerSelect | undefined): Player | undefined {
   if (playerData) {
     try {
       const hand = JSON.parse(playerData.hand)
+      const isActive = Boolean(playerData.isActive)
       return {
         ...playerData,
         hand,
+        isActive,
       } as Player
     } catch (err) {
       console.log(err instanceof Error ? err.message : 'error parsing json')

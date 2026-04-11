@@ -7,6 +7,7 @@ export default interface Player {
   sets: number
   gameId: string
   avatar: string
+  isActive: boolean
 }
 
 export interface PlayerCollection {

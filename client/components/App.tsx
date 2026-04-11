@@ -23,6 +23,7 @@ function App() {
     gameId: '',
     socketId: '',
     avatar: '../images/Fish.svg',
+    isActive: true,
   })
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [game, setGame] = useState<Game>(emptyGame)
@@ -37,6 +38,15 @@ function App() {
     socket.on('disconnect', () => {
       console.log('Disconnected from server')
       setIsConnected(false)
+    })
+
+    //Show other players as inactive if disconnected
+    socket.on('playerInactive', (inactivePlayer: Player) => {
+      setPlayers((prev) =>
+        prev.map((item) =>
+          item.socketId === inactivePlayer.socketId ? inactivePlayer : item,
+        ),
+      )
     })
 
     // Update current player.
@@ -57,9 +67,9 @@ function App() {
     })
 
     // Player list updates
-    socket.on('players', (players: Player[]) => {
-      console.log('set players', players)
-      setPlayers(players)
+    socket.on('players', (updatedPlayers: Player[]) => {
+      console.log('set players', updatedPlayers)
+      setPlayers(updatedPlayers)
     })
 
     return () => {
@@ -69,23 +79,10 @@ function App() {
       socket.off('playerLeft')
       socket.off('players')
       socket.off('updateGameDetails')
+      socket.off('playerInactive')
       disconnectSocket()
     }
   }, [currentPlayer.username])
-
-  // const handleLeaveGame = () => {
-  //   disconnectSocket()
-  //   setIsConnected(false)
-  //   setPlayers([])
-  //   setCurrentPlayer({
-  //     username: 'testing',
-  //     sets: 0,
-  //     hand: [],
-  //     gameId: '',
-  //     id: '',
-  //   })
-  //   setGameId('')
-  // }
 
   const handleJoinGame = (gameId: string, username: string) => {
     const updatedPlayer = { ...currentPlayer, username }
