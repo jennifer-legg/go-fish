@@ -35,8 +35,8 @@ function App() {
       setIsConnected(true)
     })
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from server')
+    socket.on('disconnect', (reason) => {
+      console.log('Disconnected from server', reason)
       setIsConnected(false)
     })
 
@@ -76,10 +76,10 @@ function App() {
       socket.off('connect')
       socket.off('disconnect')
       socket.off('updateCurrentPlayer')
-      socket.off('playerLeft')
-      socket.off('players')
-      socket.off('updateGameDetails')
       socket.off('playerInactive')
+      socket.off('playerLeftGame')
+      socket.off('updateGameDetails')
+      socket.off('players')
       disconnectSocket()
     }
   }, [currentPlayer.username])

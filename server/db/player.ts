@@ -101,6 +101,7 @@ export async function editPlayer({
 }: Player) {
   const response: PlayerSelect[] = await connection('player')
     .where({ username })
+    .andWhere({ game_id: gameId })
     .update({
       hand: JSON.stringify(hand),
       avatar,
