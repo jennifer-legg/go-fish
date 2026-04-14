@@ -5,7 +5,7 @@ import { Deck } from '../models/deck'
 import { Game } from '../models/game'
 import * as dbPlayer from './db/player'
 import * as dbGame from './db/game'
-import { joinGame } from './joinGame'
+import { joinGame } from './socketFunctions/joinGame'
 
 interface StartGameArg {
   currentPlayer: Player

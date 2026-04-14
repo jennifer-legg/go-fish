@@ -1,9 +1,9 @@
-import Player from '../models/player'
-import { Game } from '../models/game'
-import { CallbackSocketUpdateFn } from '../models/response'
-import * as dbPlayer from './db/player'
-import * as dbGame from './db/game'
-import dealCards from '../client/util/dealCards'
+import Player from '../../models/player'
+import { Game } from '../../models/game'
+import { CallbackSocketUpdateFn } from '../../models/response'
+import * as dbPlayer from '../db/player'
+import * as dbGame from '../db/game'
+import dealCards from '../../client/util/dealCards'
 
 interface JoinGameArg {
   gameId: string
