@@ -43,7 +43,7 @@ export default function setupSocketIO(io: Server): void {
               notifyGameUpdate(game)
               callBack({ status: 'ok' })
             } else {
-              callBack({ status: 'failed', reason })
+              callBack({ status, reason: reason ? reason : 'Server error' })
             }
           },
         )
