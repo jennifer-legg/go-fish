@@ -38,7 +38,8 @@ export default function setupSocketIO(io: Server): void {
               //If start is successful, join socket.io room and send details of player
               // and updated player list to room
               socket.join(game.gameId)
-              notifyPlayerDetails(game.gameId, player, allPlayers)
+              notifyAllPlayers(allPlayers, game.gameId)
+              notifyCurrentPlayer(player)
               notifyGameUpdate(game)
               callBack({ status: 'ok' })
             } else {
@@ -62,7 +63,8 @@ export default function setupSocketIO(io: Server): void {
             if (player && allPlayers && game && status === 'ok') {
               //If join is successful, join room and send details of player and updated player list to room
               socket.join(game.gameId)
-              notifyPlayerDetails(game.gameId, player, allPlayers)
+              notifyAllPlayers(allPlayers, gameId)
+              allPlayers.forEach((p) => notifyCurrentPlayer(p))
               notifyGameUpdate(game)
               callBack({ status: 'ok' })
             } else {
@@ -83,14 +85,15 @@ export default function setupSocketIO(io: Server): void {
       })
     })
 
-    const notifyPlayerDetails = (
-      gameId: string,
-      updatedPlayer: Player,
-      playerArr: Player[],
-    ) => {
-      //Update current player
-      io.to(socket.id).emit('updateCurrentPlayer', updatedPlayer)
-      //Send updated player list to all users in the room
+    //-- Notifications from socket to clientside --
+
+    const notifyCurrentPlayer = (player: Player) => {
+      //Notify client side of update of its current player
+      io.to(player.socketId).emit('updateCurrentPlayer', player)
+    }
+
+    const notifyAllPlayers = (playerArr: Player[], gameId: string) => {
+      //Notify client side of updated player list for all users in the room
       io.to(gameId).emit('players', playerArr)
     }
 
