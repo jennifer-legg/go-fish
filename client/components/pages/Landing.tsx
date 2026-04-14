@@ -3,17 +3,19 @@ import Themedbutton from '../themedUI/ThemedButton.tsx'
 import ThemedContainer from '../themedUI/ThemedContainer.tsx'
 import ThemedText from '../themedUI/ThemedText.tsx'
 import ThemedTextInput from '../themedUI/ThemedTextInput.tsx'
-import generateRandomString from '../../util/generateRandomString.ts'
 import Loading from '../Loading.tsx'
-import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
+// import { useGetShuffledDeck } from '../../hooks/useDeck.ts'
 import { Deck } from '../../../models/deck.ts'
 import TitleWrapper from '../TitleWrapper.tsx'
+import { exampleDeck } from '../../../data/deckExample.ts'
 
 interface Props {
   handleJoinGame: (gameId: string, username: string) => void
-  handleStartGame: (gameId: string, username: string, deck: Deck) => void
+  handleStartGame: (username: string, deck: Deck) => void
   numPlayersNeeded: number
   errorMsg: string
+  accessCode: string
+  connectToSocket: () => void
 }
 
 export default function Landing({
@@ -21,17 +23,20 @@ export default function Landing({
   handleStartGame,
   numPlayersNeeded,
   errorMsg,
+  accessCode,
+  connectToSocket,
 }: Props) {
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
-  const [accessCode, setAccessCode] = useState('')
+  const [accessCodeInput, setAccessCodeInput] = useState('')
   const [waitingForPlayer, setWaitingForPlayer] = useState(false)
   const [username, setUsername] = useState('')
-  const { data: deck, isError, isLoading } = useGetShuffledDeck()
+  const deck = exampleDeck
+  // const { data: deck, isError, isLoading } = useGetShuffledDeck()
   const [started, setStarted] = useState(false)
 
   const resetGame = () => {
-    setAccessCode('')
+    setAccessCodeInput('')
     setJoinGame(false)
     setStartAGame(false)
     setStarted(false)
@@ -40,20 +45,18 @@ export default function Landing({
   const handleStartNewGame = () => {
     if (deck) {
       setStartAGame(true)
-      const newAccessCode = generateRandomString()
-      setAccessCode(newAccessCode)
     }
   }
 
   const handleConnectToNewGame = () => {
     if (deck) {
-      handleStartGame(accessCode, username.trim(), deck)
+      handleStartGame(username.trim(), deck)
       setWaitingForPlayer(true)
     }
   }
 
   const handleJoinEstablishedGame = () => {
-    handleJoinGame(accessCode, username.trim())
+    handleJoinGame(accessCodeInput, username.trim())
   }
 
   return (
@@ -61,6 +64,7 @@ export default function Landing({
       setStarted={setStarted}
       started={started}
       resetGame={resetGame}
+      connectToSocket={connectToSocket}
     >
       <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 lg:w-3/5 h-fit p-8 ">
         {!startAGame && !joinGame && (
@@ -72,17 +76,21 @@ export default function Landing({
           <Themedbutton
             onClick={handleStartNewGame}
             color="darkBlue"
-            isDisabled={isLoading || isError}
+            // isDisabled={isLoading || isError}
           >
             <ThemedText>Start a Game</ThemedText>
           </Themedbutton>
         )}
         {startAGame && (
           <div className="flex flex-col items-center">
-            <ThemedText> ACCESS CODE </ThemedText>
-            <ThemedTextInput>
-              <ThemedText>{accessCode}</ThemedText>
-            </ThemedTextInput>
+            {waitingForPlayer && (
+              <>
+                <ThemedText> ACCESS CODE </ThemedText>
+                <ThemedTextInput>
+                  <ThemedText>{accessCode}</ThemedText>
+                </ThemedTextInput>
+              </>
+            )}
             <ThemedText>
               {' '}
               {waitingForPlayer ? 'Username' : 'Enter Username'}
@@ -124,12 +132,12 @@ export default function Landing({
             <ThemedText> Enter Access Code</ThemedText>
             <ThemedTextInput>
               <input
-                value={accessCode}
+                value={accessCodeInput}
                 className="w-full border-none bg-lightBlue px-2 py-2 text-[16px] md:py-4 md:text-[24px]"
                 type="text"
-                id="accessCode"
+                id="accessCodeInput"
                 placeholder="Enter Access Code..."
-                onChange={(e) => setAccessCode(e.target.value)}
+                onChange={(e) => setAccessCodeInput(e.target.value)}
               />
             </ThemedTextInput>
             <ThemedText> Enter Username</ThemedText>

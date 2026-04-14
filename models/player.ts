@@ -1,12 +1,13 @@
 import { Card } from './deck'
 
 export default interface Player {
-  id: string
+  socketId: string
   username: string
   hand: Card[]
   sets: number
   gameId: string
   avatar: string
+  isActive: boolean
 }
 
 export interface PlayerCollection {

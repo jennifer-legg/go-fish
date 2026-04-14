@@ -1,16 +1,13 @@
 import { Server } from 'socket.io'
-import Player, { PlayerCollection } from '../models/player'
-import Response, { CallbackFunction } from '../models/response'
-import { GameCollection } from '../models/game'
-import dealCards, { DealCardsResult } from '../client/util/dealCards'
+import Player from '../models/player'
+import { CallbackClientsideFn } from '../models/response'
 import { Deck } from '../models/deck'
-
-//Initialise storage for connected players and game
-const playerStorage: PlayerCollection = {}
-const gameStorage: GameCollection = {}
+import { Game } from '../models/game'
+import { joinGame } from './socketFunctions/joinGame'
+import { startGame } from './socketFunctions/startGame'
+import { disconnectPlayer } from './socketFunctions/disconnectPlayer'
 
 interface StartGameArg {
-  gameId: string
   currentPlayer: Player
   deck: Deck
 }
@@ -30,131 +27,79 @@ export default function setupSocketIO(io: Server): void {
     socket.on(
       'startGame',
       (
-        { gameId, currentPlayer, deck }: StartGameArg,
-        callBack: CallbackFunction,
+        { currentPlayer, deck }: StartGameArg,
+        callBack: CallbackClientsideFn,
       ) => {
-        //1. GameId should not already be in use
-        if (!gameStorage[gameId]) {
-          //Add new game to storage
-          gameStorage[gameId] = {
-            gameId,
-            pond: deck.cards,
-            playersSocketId: [],
-          }
-          //Add player to storage and join room
-          addPlayerToGame(gameId, currentPlayer)
-          //Notify all players that the game has been joined
-          notifyPlayerDetails(gameId, playerStorage[socket.id])
-          callBack({ status: 'ok' })
-        } else {
-          //Notify the user that the game could not be joined and disconnect
-          callBack({
-            status: 'failed',
-            reason: 'Invalid access code',
-          })
-          socket.disconnect()
-        }
+        //-- TODO: GameId should not already be in use
+        startGame(
+          { currentPlayer, deck, socketId: socket.id },
+          ({ status, reason, player, game, allPlayers }) => {
+            if (player && allPlayers && game && status === 'ok') {
+              //If start is successful, join socket.io room and send details of player
+              // and updated player list to room
+              socket.join(game.gameId)
+              notifyAllPlayers(allPlayers, game.gameId)
+              notifyCurrentPlayer(player)
+              notifyGameUpdate(game)
+              callBack({ status: 'ok' })
+            } else {
+              callBack({ status, reason: reason ? reason : 'Server error' })
+            }
+          },
+        )
       },
     )
 
-    //When a player joins an established game
+    // When a player joins an established game
     socket.on(
       'joinGame',
       (
         { gameId, currentPlayer, maxPlayers }: JoinGameArg,
-        callBack: CallbackFunction,
+        callBack: CallbackClientsideFn,
       ) => {
-        //1. Username should not be in use within the established game
-        //2. Game should have less than the specified number of players
-        //3. GameId should already be in use
-        const playersInGame = Object.values(playerStorage).filter(
-          (player) => player.gameId === gameId,
+        joinGame(
+          { gameId, currentPlayer, maxPlayers, socketId: socket.id },
+          ({ status, reason, player, game, allPlayers }) => {
+            if (player && allPlayers && game && status === 'ok') {
+              //If join is successful, join room and send details of player and updated player list to room
+              socket.join(game.gameId)
+              notifyAllPlayers(allPlayers, gameId)
+              allPlayers.forEach((p) => notifyCurrentPlayer(p))
+              notifyGameUpdate(game)
+              callBack({ status: 'ok' })
+            } else {
+              callBack({ status, reason: reason ? reason : 'Server error' })
+            }
+          },
         )
-        const usernameTaken =
-          playersInGame.filter(
-            (player) => player.username === currentPlayer.username,
-          ).length >= 1
-        //Check if room has less than max players and if username is taken
-        if (
-          playersInGame.length < maxPlayers &&
-          playersInGame.length >= 1 &&
-          !usernameTaken
-        ) {
-          //Add player to storage and join room
-          addPlayerToGame(gameId, currentPlayer)
-          //Deal cards to players if game at max number of players
-          if (playersInGame.length + 1 === maxPlayers) {
-            const { hands, pond }: DealCardsResult = dealCards(
-              2,
-              gameStorage[gameId].pond,
-            )
-            //Add pond and hands to player/game storage
-            gameStorage[gameId].pond = pond
-            gameStorage[gameId].playersSocketId.forEach((id, i) => {
-              if (playerStorage[id].hand) {
-                playerStorage[id].hand = hands[i]
-              }
-            })
-          }
-          //Notify all players that the game has been joined
-          notifyPlayerDetails(gameId, playerStorage[socket.id])
-          callBack({ status: 'ok' })
-        } else {
-          //Notify the user that the game could not be joined and disconnect
-          const reason: string = usernameTaken
-            ? 'Unable to join game, username already in use.'
-            : playersInGame.length < 1
-              ? 'Invalid access code'
-              : playersInGame.length >= maxPlayers
-                ? 'Unable to join game, max players reached'
-                : 'Error joining game'
-          const response: Response = { status: 'failed', reason }
-          callBack(response)
-          socket.disconnect()
-        }
       },
     )
 
-    //Logging into an established or new game
-    const addPlayerToGame = (gameId: string, currentPlayer: Player) => {
-      //Add player to storage
-      const updatedPlayer: Player = {
-        ...currentPlayer,
-        gameId,
-        id: socket.id,
-      }
-      playerStorage[socket.id] = updatedPlayer
-      //Add joined player socketid to gamestorage
-      gameStorage[gameId].playersSocketId.push(socket.id)
-      //Join the specified game
-      socket.join(gameId)
-    }
-
-    const notifyPlayerDetails = (gameId: string, updatedPlayer: Player) => {
-      //Notify other players in the game about the new player
-      io.to(gameId).emit('playerJoinedGame', updatedPlayer)
-      //Send updated player list to all users in the room
-      const updatedPlayersInGame: Player[] = Object.values(
-        playerStorage,
-      ).filter((player) => player.gameId === gameId)
-      io.to(gameId).emit('players', updatedPlayersInGame)
-    }
-
     //When a player disconnects
-    socket.on('disconnect', () => {
-      console.log(`user ${socket.id} disconnected`)
-      const player = playerStorage[socket.id]
-      if (player) {
-        //Send update about player having left to remaining players in game (socket room)
-        socket.to(player.gameId).emit('playerLeftGame', player)
-        //Remove player from storage
-        delete playerStorage[socket.id]
-        //Update players list for front-end
-        const remainingPlayersInGame: Player[] = Object.values(
-          playerStorage,
-        ).filter((p) => p.gameId === player.gameId)
-        io.to(player.gameId).emit('playerLeftGame', remainingPlayersInGame)
-      }
+    socket.on('disconnect', (reason) => {
+      console.log(`User ${socket.id} disconnected. Reason: ${reason}`)
+      disconnectPlayer(socket.id, ({ player, status }) => {
+        if (status === 'ok' && player) {
+          io.to(player.gameId).emit('playerInactive', player)
+        }
+      })
     })
+
+    //-- Notifications from socket to clientside --
+
+    const notifyCurrentPlayer = (player: Player) => {
+      //Notify client side of update of its current player
+      io.to(player.socketId).emit('updateCurrentPlayer', player)
+    }
+
+    const notifyAllPlayers = (playerArr: Player[], gameId: string) => {
+      //Notify client side of updated player list for all users in the room
+      io.to(gameId).emit('players', playerArr)
+    }
+
+    const notifyGameUpdate = (game: Game) => {
+      //Send updated game to all users/players in the game room
+      io.to(game.gameId).emit('updateGameDetails', game)
+    }
   })
 }
