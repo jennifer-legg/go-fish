@@ -4,8 +4,8 @@ import { CallbackClientsideFn } from '../models/response'
 import { Deck } from '../models/deck'
 import { Game } from '../models/game'
 import * as dbPlayer from './db/player'
-import * as dbGame from './db/game'
 import { joinGame } from './socketFunctions/joinGame'
+import { startGame } from './socketFunctions/startGame'
 
 interface StartGameArg {
   currentPlayer: Player
@@ -31,7 +31,21 @@ export default function setupSocketIO(io: Server): void {
         callBack: CallbackClientsideFn,
       ) => {
         //-- TODO: GameId should not already be in use
-        startGame({ currentPlayer, deck }, callBack)
+        startGame(
+          { currentPlayer, deck, socketId: socket.id },
+          ({ status, reason, player, game, allPlayers }) => {
+            if (player && allPlayers && game && status === 'ok') {
+              //If start is successful, join socket.io room and send details of player
+              // and updated player list to room
+              socket.join(game.gameId)
+              notifyPlayerDetails(game.gameId, player, allPlayers)
+              notifyGameUpdate(game)
+              callBack({ status: 'ok' })
+            } else {
+              callBack({ status: 'failed', reason })
+            }
+          },
+        )
       },
     )
 
@@ -102,55 +116,6 @@ export default function setupSocketIO(io: Server): void {
     const notifyGameUpdate = (game: Game) => {
       //Send updated game to all users/players in the game room
       io.to(game.gameId).emit('updateGameDetails', game)
-    }
-
-    const startGame = async (
-      { currentPlayer, deck }: StartGameArg,
-      callBack: CallbackClientsideFn,
-    ) => {
-      try {
-        //Add game to database
-        const newGame: Game | undefined = await dbGame.addNewGame(deck.cards)
-        if (newGame) {
-          //Add player to database
-          const newPlayer: Player | undefined = await dbPlayer.addNewPlayer({
-            ...currentPlayer,
-            gameId: newGame.gameId,
-            socketId: socket.id,
-            isActive: true,
-          })
-          if (newPlayer) {
-            //Join socket.io room, gameId is the room name
-            socket.join(newGame.gameId)
-            //Notify players of updated player data
-            notifyPlayerDetails(newGame.gameId, newPlayer, [newPlayer])
-            //Notify players of update game data
-            notifyGameUpdate({
-              gameId: newGame.gameId,
-              pond: newGame.pond,
-            })
-            callBack({ status: 'ok' })
-          } else {
-            //Notify the user that the game could not be joined
-            callBack({
-              status: 'failed',
-              reason: 'Unable to start the game',
-            })
-          }
-        } else {
-          //Notify the user that the game could not be joined
-          callBack({
-            status: 'failed',
-            reason: 'Unable to create game',
-          })
-        }
-      } catch (err) {
-        console.log(err instanceof Error ? err.message : 'start game failed')
-        callBack({
-          status: 'failed',
-          reason: 'Server error',
-        })
-      }
     }
   })
 }
