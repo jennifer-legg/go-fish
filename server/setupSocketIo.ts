@@ -46,16 +46,17 @@ export default function setupSocketIO(io: Server): void {
     //When a player disconnects
     socket.on('disconnect', (reason) => {
       console.log(`User ${socket.id} disconnected. Reason: ${reason}`)
-      disconnect()
+      runDisconnect()
     })
 
-    const disconnect = async () => {
+    const runDisconnect = async () => {
       try {
         //Change player's status in database
         const disconnectedPlayer = await dbPlayer.changeActiveStatus(
           false,
           socket.id,
         )
+        console.log(socket.id, disconnectedPlayer)
         //Notify remaining players that player has disconnected
         if (disconnectedPlayer) {
           io.to(disconnectedPlayer.gameId).emit(
@@ -108,7 +109,6 @@ export default function setupSocketIO(io: Server): void {
             usernamePlayerMatch.length === 0 &&
             allPlayers.length < maxPlayers
           ) {
-            console.log('join first time')
             await joinFirstTime(
               allPlayers,
               game,
@@ -121,16 +121,8 @@ export default function setupSocketIO(io: Server): void {
             usernamePlayerMatch.length === 1 &&
             !usernamePlayerMatch[0].isActive
           ) {
-            console.log('rejoin game')
             await rejoinGame(currentPlayer, callBack, allPlayers, game)
           } else {
-            console.log('unable to rejoin game')
-            console.log(
-              usernamePlayerMatch.length === 0,
-              allPlayers.length >= maxPlayers,
-              allPlayers.length >= maxPlayers,
-              usernamePlayerMatch[0]?.isActive,
-            )
             //Unable to join game
             const reason =
               usernamePlayerMatch.length === 0 &&
@@ -144,15 +136,12 @@ export default function setupSocketIO(io: Server): void {
               status: 'failed',
               reason,
             })
-            socket.disconnect()
           }
         } else {
-          console.log('game doesnt exist')
           callBack({
             status: 'failed',
             reason: 'Game does not exist',
           })
-          socket.disconnect()
         }
       } catch (err) {
         console.log(err instanceof Error ? err.message : 'Join game failed')
@@ -160,7 +149,6 @@ export default function setupSocketIO(io: Server): void {
           status: 'failed',
           reason: 'Server error',
         })
-        socket.disconnect()
       }
     }
 
@@ -174,12 +162,10 @@ export default function setupSocketIO(io: Server): void {
       const playerToEdit: Player = allPlayers.filter(
         (player) => player.username === currentPlayer.username,
       )[0]
-      console.log(playerToEdit)
       const updatedPlayer = await dbPlayer.editPlayer({
         ...playerToEdit,
         isActive: true,
       })
-      console.log('hello', updatedPlayer)
       if (updatedPlayer) {
         //Send details of player and updated player list to room
         const updatedAllPlayers: Player[] = allPlayers.map((player) =>
@@ -195,7 +181,6 @@ export default function setupSocketIO(io: Server): void {
         callBack({ status: 'ok' })
       } else {
         callBack({ status: 'failed', reason: 'Unable to rejoin game' })
-        socket.disconnect()
       }
     }
 
@@ -243,7 +228,6 @@ export default function setupSocketIO(io: Server): void {
             status: 'failed',
             reason: 'Server error',
           })
-          socket.disconnect()
         }
       } else {
         //Add currentplayer to database
@@ -264,7 +248,6 @@ export default function setupSocketIO(io: Server): void {
             status: 'failed',
             reason: 'Server error',
           })
-          socket.disconnect()
         }
       }
     }
@@ -296,20 +279,18 @@ export default function setupSocketIO(io: Server): void {
             })
             callBack({ status: 'ok' })
           } else {
-            //Notify the user that the game could not be joined and disconnect
+            //Notify the user that the game could not be joined
             callBack({
               status: 'failed',
               reason: 'Unable to start the game',
             })
-            socket.disconnect()
           }
         } else {
-          //Notify the user that the game could not be joined and disconnect
+          //Notify the user that the game could not be joined
           callBack({
             status: 'failed',
             reason: 'Unable to create game',
           })
-          socket.disconnect()
         }
       } catch (err) {
         console.log(err instanceof Error ? err.message : 'start game failed')
@@ -317,7 +298,6 @@ export default function setupSocketIO(io: Server): void {
           status: 'failed',
           reason: 'Server error',
         })
-        socket.disconnect()
       }
     }
   })

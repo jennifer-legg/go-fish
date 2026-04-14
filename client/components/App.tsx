@@ -28,6 +28,7 @@ function App() {
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [game, setGame] = useState<Game>(emptyGame)
   const [gameMessage] = useState<string>('Welcome to Go Fish!')
+  console.log(isConnected, players, currentPlayer, game)
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -82,13 +83,12 @@ function App() {
       socket.off('players')
       disconnectSocket()
     }
-  }, [currentPlayer.username])
+  }, [])
 
   const handleJoinGame = (gameId: string, username: string) => {
     const updatedPlayer = { ...currentPlayer, username }
     setCurrentPlayer(updatedPlayer)
     setGame({ ...game, gameId })
-    connectSocket()
     socket.emit(
       'joinGame',
       { gameId, currentPlayer: updatedPlayer, maxPlayers: numPlayers },
@@ -105,7 +105,6 @@ function App() {
   const handleStartGame = (username: string, deck: Deck) => {
     const updatedPlayer = { ...currentPlayer, username }
     setCurrentPlayer(updatedPlayer)
-    connectSocket()
     socket.emit(
       'startGame',
       { currentPlayer: updatedPlayer, deck },
@@ -117,6 +116,10 @@ function App() {
           : setErrorMsg('')
       },
     )
+  }
+
+  const handleConnect = () => {
+    connectSocket()
   }
 
   //Todo - implement functionality
@@ -134,6 +137,7 @@ function App() {
             numPlayersNeeded={numPlayers - players.length}
             errorMsg={errorMsg}
             accessCode={game.gameId}
+            connectToSocket={handleConnect}
           />
         )}
         {game.gameId && isConnected && players.length === numPlayers && (

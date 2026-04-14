@@ -7,15 +7,22 @@ interface Props {
   started: boolean
   setStarted: React.Dispatch<React.SetStateAction<boolean>>
   resetGame: () => void
+  connectToSocket: () => void
 }
 export default function TitleWrapper({
   children,
   started,
   setStarted,
   resetGame,
+  connectToSocket,
 }: Props) {
   const columnStruct =
     'grid grid-cols-4 gap-[12px] md:grid-cols-8 md:gap-[12px] lg:grid-cols-12 lg:gap-[20px] min-h-screen'
+
+  const handleClickPlay = () => {
+    setStarted(true)
+    connectToSocket()
+  }
   return (
     // Added min-h-screen to ensure the "center" is actually the middle of the page
     <div
@@ -68,9 +75,7 @@ export default function TitleWrapper({
           )}
           {!started && (
             <div className="mt-8 flex">
-              <Themedbutton onClick={() => setStarted(true)}>
-                Play Now
-              </Themedbutton>
+              <Themedbutton onClick={handleClickPlay}>Play Now</Themedbutton>
             </div>
           )}
         </div>

@@ -15,6 +15,7 @@ interface Props {
   numPlayersNeeded: number
   errorMsg: string
   accessCode: string
+  connectToSocket: () => void
 }
 
 export default function Landing({
@@ -23,6 +24,7 @@ export default function Landing({
   numPlayersNeeded,
   errorMsg,
   accessCode,
+  connectToSocket,
 }: Props) {
   const [joinGame, setJoinGame] = useState(false)
   const [startAGame, setStartAGame] = useState(false)
@@ -62,6 +64,7 @@ export default function Landing({
       setStarted={setStarted}
       started={started}
       resetGame={resetGame}
+      connectToSocket={connectToSocket}
     >
       <ThemedContainer classname="w-3/5 min-w-[320px] md:misn-w-[600px] md:w-4/5 lg:w-3/5 h-fit p-8 ">
         {!startAGame && !joinGame && (
