@@ -1,11 +1,11 @@
 import { Server } from 'socket.io'
 import Player from '../models/player'
-import { CallbackFunction } from '../models/response'
+import { CallbackClientsideFn } from '../models/response'
 import { Deck } from '../models/deck'
 import { Game } from '../models/game'
 import * as dbPlayer from './db/player'
 import * as dbGame from './db/game'
-import dealCards from '../client/util/dealCards'
+import { joinGame } from './joinGame'
 
 interface StartGameArg {
   currentPlayer: Player
@@ -26,7 +26,10 @@ export default function setupSocketIO(io: Server): void {
     //When a player starts a new game
     socket.on(
       'startGame',
-      ({ currentPlayer, deck }: StartGameArg, callBack: CallbackFunction) => {
+      (
+        { currentPlayer, deck }: StartGameArg,
+        callBack: CallbackClientsideFn,
+      ) => {
         //-- TODO: GameId should not already be in use
         startGame({ currentPlayer, deck }, callBack)
       },
@@ -37,9 +40,22 @@ export default function setupSocketIO(io: Server): void {
       'joinGame',
       (
         { gameId, currentPlayer, maxPlayers }: JoinGameArg,
-        callBack: CallbackFunction,
+        callBack: CallbackClientsideFn,
       ) => {
-        joinGame({ gameId, currentPlayer, maxPlayers }, callBack)
+        joinGame(
+          { gameId, currentPlayer, maxPlayers, socketId: socket.id },
+          ({ status, reason, player, game, allPlayers }) => {
+            if (player && allPlayers && game && status === 'ok') {
+              //If join is successful, join room and send details of player and updated player list to room
+              socket.join(game.gameId)
+              notifyPlayerDetails(game.gameId, player, allPlayers)
+              notifyGameUpdate(game)
+              callBack({ status: 'ok' })
+            } else {
+              callBack({ status, reason: reason ? reason : 'Server error' })
+            }
+          },
+        )
       },
     )
 
@@ -56,7 +72,6 @@ export default function setupSocketIO(io: Server): void {
           false,
           socket.id,
         )
-        console.log(socket.id, disconnectedPlayer)
         //Notify remaining players that player has disconnected
         if (disconnectedPlayer) {
           io.to(disconnectedPlayer.gameId).emit(
@@ -89,172 +104,9 @@ export default function setupSocketIO(io: Server): void {
       io.to(game.gameId).emit('updateGameDetails', game)
     }
 
-    const joinGame = async (
-      { gameId, currentPlayer, maxPlayers }: JoinGameArg,
-      callBack: CallbackFunction,
-    ) => {
-      try {
-        //Check if returning player or new player to join game
-        //1. Game should already be in database
-        //2. Game should have at least one player
-        //3. Player is joining for first time if username is not within the game and game hasn't reached max players
-        //4. Player is rejoining if their username is within the game and they're inactive
-        const allPlayers = await dbPlayer.getAllPlayersInGame(gameId)
-        const game = await dbGame.getGameById(gameId)
-        if (game && allPlayers.length != 0) {
-          const usernamePlayerMatch: Player[] = allPlayers.filter(
-            (player) => player.username === currentPlayer.username,
-          )
-          if (
-            usernamePlayerMatch.length === 0 &&
-            allPlayers.length < maxPlayers
-          ) {
-            await joinFirstTime(
-              allPlayers,
-              game,
-              maxPlayers,
-              currentPlayer,
-              gameId,
-              callBack,
-            )
-          } else if (
-            usernamePlayerMatch.length === 1 &&
-            !usernamePlayerMatch[0].isActive
-          ) {
-            await rejoinGame(currentPlayer, callBack, allPlayers, game)
-          } else {
-            //Unable to join game
-            const reason =
-              usernamePlayerMatch.length === 0 &&
-              allPlayers.length >= maxPlayers
-                ? 'Game already has maximum players'
-                : usernamePlayerMatch.length === 1 &&
-                    usernamePlayerMatch[0]?.isActive
-                  ? 'Username already in use'
-                  : 'Server error, unable to join game'
-            callBack({
-              status: 'failed',
-              reason,
-            })
-          }
-        } else {
-          callBack({
-            status: 'failed',
-            reason: 'Game does not exist',
-          })
-        }
-      } catch (err) {
-        console.log(err instanceof Error ? err.message : 'Join game failed')
-        callBack({
-          status: 'failed',
-          reason: 'Server error',
-        })
-      }
-    }
-
-    const rejoinGame = async (
-      currentPlayer: Player,
-      callBack: CallbackFunction,
-      allPlayers: Player[],
-      game: Game,
-    ) => {
-      //Change player status to active
-      const playerToEdit: Player = allPlayers.filter(
-        (player) => player.username === currentPlayer.username,
-      )[0]
-      const updatedPlayer = await dbPlayer.editPlayer({
-        ...playerToEdit,
-        isActive: true,
-      })
-      if (updatedPlayer) {
-        //Send details of player and updated player list to room
-        const updatedAllPlayers: Player[] = allPlayers.map((player) =>
-          player.username === currentPlayer.username ? updatedPlayer : player,
-        )
-        socket.join(updatedPlayer.gameId)
-        notifyPlayerDetails(
-          updatedPlayer.gameId,
-          updatedPlayer,
-          updatedAllPlayers,
-        )
-        notifyGameUpdate(game)
-        callBack({ status: 'ok' })
-      } else {
-        callBack({ status: 'failed', reason: 'Unable to rejoin game' })
-      }
-    }
-
-    const joinFirstTime = async (
-      allPlayers: Player[],
-      game: Game,
-      maxPlayers: number,
-      currentPlayer: Player,
-      gameId: string,
-      callBack: CallbackFunction,
-    ) => {
-      //If game will be at max players with addition of this joining player,
-      //deal cards from game pond to each player and add remaining cards to game pond.
-      //Otherwise, just add player to game
-      if (allPlayers.length + 1 === maxPlayers) {
-        //Deal cards from game pond
-        const { hands, pond } = dealCards(maxPlayers, game.pond)
-        //Add hands and players to database
-        const updatedOpponent = await dbPlayer.editPlayer({
-          ...allPlayers[0],
-          hand: hands[1],
-        })
-        const updatedPlayer = await dbPlayer.addNewPlayer({
-          ...currentPlayer,
-          hand: hands[0],
-          socketId: socket.id,
-          gameId,
-          isActive: true,
-        })
-        //Update pond in database
-        const updatedGame = await dbGame.editPondInGame({
-          pond,
-          gameId,
-        })
-        if (updatedPlayer && updatedOpponent && updatedGame) {
-          //Join socket room and update client for all players with game/player details
-          socket.join(gameId)
-          notifyPlayerDetails(gameId, updatedPlayer, [
-            updatedOpponent,
-            updatedPlayer,
-          ])
-          notifyGameUpdate(updatedGame)
-        } else {
-          callBack({
-            status: 'failed',
-            reason: 'Server error',
-          })
-        }
-      } else {
-        //Add currentplayer to database
-        const updatedPlayer = await dbPlayer.addNewPlayer({
-          ...currentPlayer,
-          socketId: socket.id,
-        })
-        //Notify all players that the game has been joined
-        if (updatedPlayer) {
-          socket.join(gameId)
-          notifyPlayerDetails(gameId, updatedPlayer, [
-            ...allPlayers,
-            updatedPlayer,
-          ])
-          notifyGameUpdate(game)
-        } else {
-          callBack({
-            status: 'failed',
-            reason: 'Server error',
-          })
-        }
-      }
-    }
-
     const startGame = async (
       { currentPlayer, deck }: StartGameArg,
-      callBack: CallbackFunction,
+      callBack: CallbackClientsideFn,
     ) => {
       try {
         //Add game to database
