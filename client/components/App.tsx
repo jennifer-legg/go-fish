@@ -42,11 +42,9 @@ function App() {
     })
 
     //Show other players as inactive if disconnected
-    socket.on('playerInactive', (inactivePlayer: Player) => {
+    socket.on('playerInactive', (player: Player) => {
       setPlayers((prev) =>
-        prev.map((item) =>
-          item.socketId === inactivePlayer.socketId ? inactivePlayer : item,
-        ),
+        prev.map((item) => (item.socketId === player.socketId ? player : item)),
       )
     })
 

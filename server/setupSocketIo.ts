@@ -3,9 +3,9 @@ import Player from '../models/player'
 import { CallbackClientsideFn } from '../models/response'
 import { Deck } from '../models/deck'
 import { Game } from '../models/game'
-import * as dbPlayer from './db/player'
 import { joinGame } from './socketFunctions/joinGame'
 import { startGame } from './socketFunctions/startGame'
+import { disconnectPlayer } from './socketFunctions/disconnectPlayer'
 
 interface StartGameArg {
   currentPlayer: Player
@@ -76,31 +76,12 @@ export default function setupSocketIO(io: Server): void {
     //When a player disconnects
     socket.on('disconnect', (reason) => {
       console.log(`User ${socket.id} disconnected. Reason: ${reason}`)
-      runDisconnect()
-    })
-
-    const runDisconnect = async () => {
-      try {
-        //Change player's status in database
-        const disconnectedPlayer = await dbPlayer.changeActiveStatus(
-          false,
-          socket.id,
-        )
-        //Notify remaining players that player has disconnected
-        if (disconnectedPlayer) {
-          io.to(disconnectedPlayer.gameId).emit(
-            'playerInactive',
-            disconnectedPlayer,
-          )
+      disconnectPlayer(socket.id, ({ player, status }) => {
+        if (status === 'ok' && player) {
+          io.to(player.gameId).emit('playerInactive', player)
         }
-      } catch (err) {
-        console.log(
-          err instanceof Error
-            ? err.message
-            : 'Change status to inactive failed',
-        )
-      }
-    }
+      })
+    })
 
     const notifyPlayerDetails = (
       gameId: string,
