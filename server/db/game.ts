@@ -56,7 +56,7 @@ export async function editPondInGame({
     .where({ id: gameId })
     .update({ pond: pondJson })
     .returning([...gameSelect])
-  if (response[0]) {
+  if (response[0] && response[0]?.pond) {
     try {
       const pond = JSON.parse(response[0].pond)
       return { ...response[0], pond } as Game
@@ -65,4 +65,25 @@ export async function editPondInGame({
     }
   }
   return undefined
+}
+
+export async function getCardFromPond(
+  gameId: string,
+): Promise<Card | undefined> {
+  const response: GameSelect = await connection('game')
+    .where({ id: gameId })
+    .select(...gameSelect)
+    .first()
+  if (response && response.pond.length > 0) {
+    try {
+      const pond = JSON.parse(response.pond)
+      await editPondInGame({ pond: pond.slice(1), gameId })
+      return pond[0] as Card
+    } catch (err) {
+      console.log(err instanceof Error ? err.message : 'error parsing json')
+      throw new Error('Unable to parse json')
+    }
+  } else {
+    return undefined
+  }
 }

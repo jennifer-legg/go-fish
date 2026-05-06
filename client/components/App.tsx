@@ -28,7 +28,7 @@ function App() {
   const [errorMsg, setErrorMsg] = useState<string>('')
   const [game, setGame] = useState<Game>(emptyGame)
   const [gameMessage] = useState<string>('Welcome to Go Fish!')
-  console.log(isConnected, players, currentPlayer, game)
+  const [pondIsEmpty, setPondIsEmpty] = useState<boolean>(false)
 
   useEffect(() => {
     socket.on('connect', () => {
@@ -59,6 +59,12 @@ function App() {
       console.log(`${player.username} left room`)
     })
 
+    //When pond is empty, disable pond
+    socket.on('pondEmpty', (isEmpty: boolean) => {
+      console.log('pond is empty')
+      setPondIsEmpty(isEmpty)
+    })
+
     //Update game info
     socket.on('updateGameDetails', (game: Game) => {
       console.log('set game', game)
@@ -75,6 +81,7 @@ function App() {
       socket.off('connect')
       socket.off('disconnect')
       socket.off('updateCurrentPlayer')
+      socket.off('pondEmpty')
       socket.off('playerInactive')
       socket.off('playerLeftGame')
       socket.off('updateGameDetails')
@@ -100,6 +107,14 @@ function App() {
     )
   }
 
+  const handleGoFish = () => {
+    socket.emit('goFish', currentPlayer, (response: Response) => {
+      response.status === 'failed'
+        ? setErrorMsg(response.reason ? response.reason : 'Error joining game.')
+        : setErrorMsg('')
+    })
+  }
+
   const handleStartGame = (username: string, deck: Deck) => {
     const updatedPlayer = { ...currentPlayer, username }
     setCurrentPlayer(updatedPlayer)
@@ -120,11 +135,6 @@ function App() {
     connectSocket()
   }
 
-  //Todo - implement functionality
-  // const handleGetNewCard = () => {
-  //   console.log('Get new card')
-  // }
-
   return (
     <>
       <div className="app bg-lightBlue">
@@ -143,6 +153,8 @@ function App() {
             players={players}
             currentPlayer={currentPlayer}
             gameMessage={gameMessage}
+            handleGoFish={handleGoFish}
+            pondIsEmpty={pondIsEmpty}
           />
         )}
       </div>

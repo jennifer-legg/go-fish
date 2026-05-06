@@ -6,6 +6,7 @@ import { Game } from '../models/game'
 import { joinGame } from './socketFunctions/joinGame'
 import { startGame } from './socketFunctions/startGame'
 import { disconnectPlayer } from './socketFunctions/disconnectPlayer'
+import { goFish } from './socketFunctions/goFish'
 
 interface StartGameArg {
   currentPlayer: Player
@@ -72,6 +73,27 @@ export default function setupSocketIO(io: Server): void {
             }
           },
         )
+      },
+    )
+
+    //goFish
+    socket.on(
+      'goFish',
+      (currentPlayer: Player, callBack: CallbackClientsideFn) => {
+        goFish(currentPlayer, ({ status, reason, player }) => {
+          if (player && status === 'ok') {
+            //If goFish is successful, send details of updated player to room
+            notifyCurrentPlayer(player)
+            callBack({ status: 'ok' })
+          } else {
+            if (reason === 'Empty') {
+              io.to(currentPlayer.gameId).emit('pondEmpty', true)
+              callBack({ status, reason })
+            } else {
+              callBack({ status, reason: 'Server error' })
+            }
+          }
+        })
       },
     )
 

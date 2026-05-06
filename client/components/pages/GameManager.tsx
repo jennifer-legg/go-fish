@@ -11,17 +11,17 @@ interface Props {
   gameMessage: string
   currentPlayer: Player
   players: Player[]
+  handleGoFish: () => void
+  pondIsEmpty: boolean
 }
 
 export default function GameManager({
   gameMessage,
   currentPlayer,
   players,
+  handleGoFish,
+  pondIsEmpty,
 }: Props) {
-  //Todo - implement functionality
-  const handleGetNewCard = () => {
-    console.log('Get new card')
-  }
   return (
     <GameLayout
       avatarUser={<Avatar username={currentPlayer.username} />}
@@ -63,8 +63,8 @@ export default function GameManager({
       pond={
         <Pond
           currentCard={null}
-          buttonDisabled={true}
-          getNewCard={handleGetNewCard}
+          buttonDisabled={pondIsEmpty}
+          getNewCard={handleGoFish}
         />
       }
     />

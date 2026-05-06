@@ -1,5 +1,6 @@
 import connection from './connection'
 import Player from '../../models/player'
+import { Card } from '../../models/deck'
 
 type PlayerSelect = {
   socketId: string
@@ -35,6 +36,18 @@ export async function getPlayerByUsername(
   const response: PlayerSelect | undefined = await connection('player')
     .where({ username })
     .select(...playerSelect)
+    .first()
+  return convertJson(response)
+}
+
+export async function getPlayerByUsernameGameId(
+  username: string,
+  gameId: string,
+): Promise<Player | undefined> {
+  const response: PlayerSelect | undefined = await connection('player')
+    .where({ username })
+    .select(...playerSelect)
+    .andWhere({ gameId })
     .first()
   return convertJson(response)
 }
@@ -130,6 +143,25 @@ function convertJson(playerData: PlayerSelect | undefined): Player | undefined {
     } catch (err) {
       console.log(err instanceof Error ? err.message : 'error parsing json')
     }
+  }
+  return undefined
+}
+
+export async function addCardToHand(
+  username: string,
+  card: Card,
+  gameId: string,
+): Promise<Player | undefined> {
+  const response: Player | undefined = await getPlayerByUsernameGameId(
+    username,
+    gameId,
+  )
+  if (response) {
+    response.hand.push(card)
+    const response2: Player | undefined = await editPlayer({
+      ...response,
+    })
+    return response2
   }
   return undefined
 }
